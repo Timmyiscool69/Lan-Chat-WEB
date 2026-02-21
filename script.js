@@ -2,7 +2,7 @@ console.log("Script loaded");
 
 const ably = new Ably.Realtime({
     key: "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg",
-    clientId: "test-client-" + Math.floor(Math.random() * 1000)
+    clientId: "client-" + Math.floor(Math.random() * 1000)
 });
 
 ably.connection.on('connected', () => {
@@ -17,34 +17,38 @@ const channel = ably.channels.get("global-chat");
 
 let username = "Guest" + Math.floor(Math.random() * 1000);
 
-function changeName() {
-    console.log("Change name clicked");
-    const newName = document.getElementById("nameInput").value;
-    if (newName) {
+const chat = document.getElementById("chat");
+const messageInput = document.getElementById("messageInput");
+const nameInput = document.getElementById("nameInput");
+const sendBtn = document.getElementById("sendBtn");
+const nameBtn = document.getElementById("nameBtn");
+
+// Send button
+sendBtn.addEventListener("click", () => {
+    const message = messageInput.value.trim();
+    if (message !== "") {
+        channel.publish("message", {
+            name: username,
+            text: message,
+            time: new Date().toLocaleTimeString()
+        });
+        messageInput.value = "";
+    }
+});
+
+// Change name button
+nameBtn.addEventListener("click", () => {
+    const newName = nameInput.value.trim();
+    if (newName !== "") {
         username = newName;
         alert("Name changed to " + username);
     }
-}
+});
 
-function sendMessage() {
-    console.log("Send clicked");
-    const input = document.getElementById("messageInput");
-    const message = input.value;
-
-    if (message.trim() !== "") {
-        channel.publish("message", {
-            name: username,
-            text: message
-        }).then(() => {
-            console.log("Message sent ✅");
-        }).catch(err => {
-            console.error("Publish failed ❌", err);
-        });
-
-        input.value = "";
-    }
-}
-
+// Receive messages
 channel.subscribe("message", (msg) => {
-    console.log("Message received:", msg.data);
+    const div = document.createElement("div");
+    div.innerText = `[${msg.data.time}] ${msg.data.name}: ${msg.data.text}`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
 });
