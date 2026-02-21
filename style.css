@@ -9,7 +9,6 @@ body {
     height: 100vh;
 }
 
-/* Loading Screen */
 #loadingScreen {
     position: fixed;
     top: 0;
@@ -24,7 +23,6 @@ body {
     color: white;
 }
 
-/* Chat Container */
 .chat-container {
     width: 900px;
     height: 650px;
@@ -42,21 +40,13 @@ h1 {
     font-size: 28px;
 }
 
-/* Online Counter */
-#onlineCount {
-    font-size: 16px;
-    margin-bottom: 10px;
-    opacity: 0.8;
-}
-
-/* Chat Display */
 #chat {
     flex: 1;
     overflow-y: auto;
     background: #0f172a;
     padding: 20px;
     border-radius: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     font-size: 18px;
 }
 
@@ -67,15 +57,6 @@ h1 {
     border-radius: 10px;
 }
 
-/* Typing Indicator */
-#typingIndicator {
-    height: 20px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    opacity: 0.7;
-}
-
-/* Input Areas */
 .input-area,
 .name-area {
     display: flex;
