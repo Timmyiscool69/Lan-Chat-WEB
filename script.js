@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded");
+console.log("Multi-Channel Chat Loaded!");
 
 let username = localStorage.getItem("username") || 
                "Guest" + Math.floor(Math.random() * 1000);
