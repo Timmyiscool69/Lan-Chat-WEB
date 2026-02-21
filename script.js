@@ -1,61 +1,50 @@
-// Connect to Ably
-const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
+console.log("Script loaded");
+
+const ably = new Ably.Realtime({
+    key: "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg",
+    clientId: "test-client-" + Math.floor(Math.random() * 1000)
+});
+
+ably.connection.on('connected', () => {
+    console.log("Connected to Ably ✅");
+});
+
+ably.connection.on('failed', (err) => {
+    console.error("Connection failed ❌", err);
+});
+
 const channel = ably.channels.get("global-chat");
 
-// Load saved username
-let username = localStorage.getItem("username") || 
-               "Guest" + Math.floor(Math.random() * 1000);
-
-// Ask notification permission
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
+let username = "Guest" + Math.floor(Math.random() * 1000);
 
 function changeName() {
-    const newName = document.getElementById("nameInput").value.trim();
+    console.log("Change name clicked");
+    const newName = document.getElementById("nameInput").value;
     if (newName) {
         username = newName;
-        localStorage.setItem("username", username);
         alert("Name changed to " + username);
     }
 }
 
 function sendMessage() {
+    console.log("Send clicked");
     const input = document.getElementById("messageInput");
-    const message = input.value.trim();
+    const message = input.value;
 
-    if (message !== "") {
+    if (message.trim() !== "") {
         channel.publish("message", {
             name: username,
-            text: message,
-            time: new Date().toLocaleTimeString()
+            text: message
+        }).then(() => {
+            console.log("Message sent ✅");
+        }).catch(err => {
+            console.error("Publish failed ❌", err);
         });
 
         input.value = "";
     }
 }
 
-// Send with Enter key
-document.getElementById("messageInput").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
-});
-
-// Listen for messages
 channel.subscribe("message", (msg) => {
-    const chat = document.getElementById("chat");
-
-    const messageDiv = document.createElement("div");
-    messageDiv.innerText = `[${msg.data.time}] ${msg.data.name}: ${msg.data.text}`;
-
-    chat.appendChild(messageDiv);
-    chat.scrollTop = chat.scrollHeight;
-
-    // Show notification if tab not focused
-    if (document.hidden && Notification.permission === "granted") {
-        new Notification(msg.data.name, {
-            body: msg.data.text
-        });
-    }
+    console.log("Message received:", msg.data);
 });
