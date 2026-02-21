@@ -1,8 +1,11 @@
+console.log("Web Chat Script Loaded");
+
+// Replace with your Ably API key
 const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
 const channel = ably.channels.get("chat");
 
-let username = localStorage.getItem("username") || 
-               "Guest" + Math.floor(Math.random() * 1000);
+let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random() * 1000);
+let showNotifications = true;
 
 const chat = document.getElementById("chat");
 const messageInput = document.getElementById("messageInput");
@@ -18,8 +21,16 @@ const chatContainer = document.querySelector(".chat-container");
 let typingUsers = new Set();
 let typingTimeout;
 
-// ========== CONNECTION ==========
+// ========== Notifications ==========
+if ("Notification" in window) {
+    Notification.requestPermission().then(permission => {
+        if (permission !== "granted") showNotifications = false;
+    });
+}
+
+// ========== Connection ==========
 ably.connection.on("connected", async () => {
+    console.log("Connected to Ably ✅");
     loadingScreen.style.display = "none";
     chatContainer.style.display = "flex";
 
@@ -27,7 +38,7 @@ ably.connection.on("connected", async () => {
     await channel.presence.enter(username);
 });
 
-// ========== ONLINE COUNT ==========
+// ========== Online Count ==========
 function updateOnlineCount() {
     channel.presence.get().then(members => {
         onlineCount.textContent = "Online: " + members.length;
@@ -37,11 +48,9 @@ function updateOnlineCount() {
 channel.presence.subscribe(() => {
     updateOnlineCount();
 });
-
-// Initial load
 setTimeout(updateOnlineCount, 1000);
 
-// ========== SEND MESSAGE ==========
+// ========== Send Message ==========
 function sendMessage() {
     const text = messageInput.value.trim();
     if (!text) return;
@@ -56,16 +65,24 @@ messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
-// ========== RECEIVE MESSAGE ==========
+// ========== Receive Messages ==========
 channel.subscribe("message", (msg) => {
     const div = document.createElement("div");
     div.classList.add("message");
     div.textContent = msg.data;
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
+
+    // Show web notification if tab not focused
+    if (showNotifications && "Notification" in window && document.hidden) {
+        new Notification("New Message", {
+            body: msg.data,
+            icon: "https://img.icons8.com/color/48/000000/chat--v1.png"
+        });
+    }
 });
 
-// ========== CHANGE NAME ==========
+// ========== Change Name ==========
 nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
@@ -75,7 +92,7 @@ nameBtn.addEventListener("click", () => {
     alert("Name changed to " + username);
 });
 
-// ========== TYPING SYSTEM ==========
+// ========== Typing System ==========
 messageInput.addEventListener("input", () => {
     channel.publish("typing", username);
 
@@ -87,7 +104,6 @@ messageInput.addEventListener("input", () => {
 
 channel.subscribe("typing", (msg) => {
     const name = msg.data;
-
     if (!name) return;
 
     if (name !== username) {
@@ -109,7 +125,7 @@ function updateTypingIndicator() {
         typingIndicator.textContent = "";
     } 
     else if (count === 1) {
-        typingIndicator.textContent = "Someone is typing..";
+        typingIndicator.textContent = "Someone is typing...";
     } 
     else if (count === 2) {
         typingIndicator.textContent = "2 people are typing...";
