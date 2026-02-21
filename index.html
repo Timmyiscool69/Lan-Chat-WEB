@@ -6,17 +6,21 @@
 </head>
 <body>
 
-<h2>Global Chat</h2>
+<div class="chat-container">
+    <h2>🌎 Global Chat</h2>
 
-<div id="chat"></div>
+    <div id="chat"></div>
 
-<input type="text" id="messageInput" placeholder="Type message...">
-<button id="sendBtn">Send</button>
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type message..." />
+        <button id="sendBtn">Send</button>
+    </div>
 
-<br><br>
-
-<input type="text" id="nameInput" placeholder="Change name">
-<button id="nameBtn">Set Name</button>
+    <div class="name-area">
+        <input type="text" id="nameInput" placeholder="Change name" />
+        <button id="nameBtn">Set Name</button>
+    </div>
+</div>
 
 <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 <script src="script.js"></script>
