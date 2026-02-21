@@ -109,7 +109,7 @@ function updateTypingIndicator() {
         typingIndicator.textContent = "";
     } 
     else if (count === 1) {
-        typingIndicator.textContent = "Someone is typing...";
+        typingIndicator.textContent = "Someone is typing..";
     } 
     else if (count === 2) {
         typingIndicator.textContent = "2 people are typing...";
