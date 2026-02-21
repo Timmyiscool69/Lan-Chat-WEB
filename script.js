@@ -94,10 +94,11 @@ function sendMessage() {
 
     const msg = `${getDisplayName()}: ${text}`;
 
+    // Clear input immediately
+    messageInput.value = "";
+    messageInput.focus();
+
     channel.publish("message", msg)
-        .then(() => {
-            messageInput.value = "";
-        })
         .catch(err => {
             console.error("Send failed:", err);
         });
