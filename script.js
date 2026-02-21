@@ -1,38 +1,70 @@
-console.log("Web Chat Script Loaded");
+console.log("Multi-Channel Chat Loaded");
 
-// Replace with your Ably API key
-const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
-const channel = ably.channels.get("chat"); // Must match .NET app
+let username = localStorage.getItem("username") || 
+               "Guest" + Math.floor(Math.random() * 1000);
+localStorage.setItem("username", username);
 
-let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random() * 1000);
-let showNotifications = true; // default notifications on
+// ===== PASSWORDS =====
+const channelPasswords = {
+    "private-1": "alpha123",
+    "private-2": "beta123"
+};
 
+// ===== ABLY SETUP =====
+const ably = new Ably.Realtime("PUT_YOUR_KEY_HERE");
+
+let currentChannelName = "public-chat";
+let channel = ably.channels.get(currentChannelName);
+
+// DOM
 const chat = document.getElementById("chat");
 const messageInput = document.getElementById("messageInput");
 const nameInput = document.getElementById("nameInput");
 const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
 
-const loadingScreen = document.getElementById("loadingScreen");
-const chatContainer = document.querySelector(".chat-container");
-
-// Request notification permission
-if ("Notification" in window) {
-    Notification.requestPermission().then(permission => {
-        if (permission !== "granted") {
-            showNotifications = false;
-        }
+// ===== SUBSCRIBE FUNCTION =====
+function subscribeToChannel() {
+    channel.subscribe("message", (msg) => {
+        const div = document.createElement("div");
+        div.classList.add("message");
+        div.textContent = msg.data;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
     });
 }
 
-// Wait for Ably connection
-ably.connection.on("connected", () => {
-    console.log("Connected to Ably ✅");
-    loadingScreen.style.display = "none";
-    chatContainer.style.display = "flex";
-});
+// Initial subscription
+subscribeToChannel();
 
-// Send message in plain string format so .NET can read
+// ===== SWITCH CHANNEL =====
+function switchChannel(newChannel) {
+
+    // Check password if needed
+    if (channelPasswords[newChannel]) {
+        const entered = prompt("Enter password for this channel:");
+        if (entered !== channelPasswords[newChannel]) {
+            alert("Wrong password.");
+            return;
+        }
+    }
+
+    // Unsubscribe from old channel
+    channel.unsubscribe();
+
+    // Clear chat visually
+    chat.innerHTML = "";
+
+    // Switch
+    currentChannelName = newChannel;
+    channel = ably.channels.get(currentChannelName);
+
+    subscribeToChannel();
+
+    alert("Switched to: " + newChannel);
+}
+
+// ===== SEND MESSAGE =====
 function sendMessage() {
     const text = messageInput.value.trim();
     if (!text) return;
@@ -47,30 +79,12 @@ messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
-// Change username
-function changeName() {
+// ===== CHANGE NAME =====
+nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
+
     username = newName;
     localStorage.setItem("username", username);
     alert("Name changed to " + username);
-}
-
-nameBtn.addEventListener("click", changeName);
-
-// Subscribe to messages
-channel.subscribe("message", (msg) => {
-    const div = document.createElement("div");
-    div.classList.add("message");
-    div.textContent = msg.data; // plain string for .NET compatibility
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-
-    // Web notification for new message
-    if (showNotifications && "Notification" in window && document.hidden) {
-        new Notification("New Message", {
-            body: msg.data,
-            icon: "https://img.icons8.com/color/48/000000/chat--v1.png" // optional icon
-        });
-    }
 });
