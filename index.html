@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Global Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<div class="chat-container">
+    <h2>🌎 Global Chat</h2>
+
+    <div id="chat"></div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <div class="name-area">
+        <input type="text" id="nameInput" placeholder="Change name" />
+        <button onclick="changeName()">Set Name</button>
+    </div>
+</div>
+
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
