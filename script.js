@@ -52,17 +52,23 @@ function renderChannel() {
 // ===== SUBSCRIBE =====
 function subscribeToChannel() {
 
-    channel.unsubscribe();
+    if(channel) channel.unsubscribe();
+
+    channel = ably.channels.get(currentChannelName);
 
     channel.subscribe("message", (msg) => {
         const messageText = msg.data;
 
-        channelLogs[currentChannelName].push(messageText);
+        // Only add messages from this channel
+        if(!channelLogs[currentChannelName].includes(messageText)) {
+            channelLogs[currentChannelName].push(messageText);
+        }
 
         renderChannel();
     });
 }
 
+// Initial subscription
 subscribeToChannel();
 
 // ===== SWITCH CHANNEL =====
@@ -70,6 +76,7 @@ window.switchChannel = function(newChannel) {
 
     if (newChannel === currentChannelName) return;
 
+    // Check password
     if (channelPasswords[newChannel]) {
         const entered = prompt("Enter password for this channel:");
         if (entered !== channelPasswords[newChannel]) {
@@ -79,7 +86,6 @@ window.switchChannel = function(newChannel) {
     }
 
     currentChannelName = newChannel;
-    channel = ably.channels.get(currentChannelName);
 
     subscribeToChannel();
     renderChannel();
@@ -90,7 +96,7 @@ window.switchChannel = function(newChannel) {
 // ===== SEND MESSAGE =====
 function sendMessage() {
     const text = messageInput.value.trim();
-    if (!text) return;
+    if (!text || !channel) return;
 
     const msg = `${getDisplayName()}: ${text}`;
 
@@ -99,9 +105,7 @@ function sendMessage() {
     messageInput.focus();
 
     channel.publish("message", msg)
-        .catch(err => {
-            console.error("Send failed:", err);
-        });
+        .catch(err => console.error("Send failed:", err));
 }
 
 sendBtn.addEventListener("click", sendMessage);
@@ -115,8 +119,15 @@ nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
 
+    // Prevent duplicate username in current logs
+    for (let ch in channelLogs) {
+        if (channelLogs[ch].some(m => m.startsWith("WEB | " + newName))) {
+            alert("Username already exists!");
+            return;
+        }
+    }
+
     username = newName;
     localStorage.setItem("username", username);
-
     alert("Name changed to " + username);
 });
