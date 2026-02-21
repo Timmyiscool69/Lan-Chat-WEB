@@ -1,12 +1,20 @@
 console.log("Web Chat Script Loaded");
 
-// Replace with your Ably API key
-const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
-const channel = ably.channels.get("chat");
-
+// Get stored username or generate one
 let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random() * 1000);
+localStorage.setItem("username", username);
+
 let showNotifications = true;
 
+// ===== Ably Realtime Client with clientId =====
+const ably = new Ably.Realtime({ 
+    key: "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg",
+    clientId: username
+});
+
+const channel = ably.channels.get("chat");
+
+// DOM Elements
 const chat = document.getElementById("chat");
 const messageInput = document.getElementById("messageInput");
 const nameInput = document.getElementById("nameInput");
@@ -14,43 +22,50 @@ const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
 const onlineCount = document.getElementById("onlineCount");
 const typingIndicator = document.getElementById("typingIndicator");
-
 const loadingScreen = document.getElementById("loadingScreen");
 const chatContainer = document.querySelector(".chat-container");
 
 let typingUsers = new Set();
 let typingTimeout;
 
-// ========== Notifications ==========
+// ===== Notifications =====
 if ("Notification" in window) {
     Notification.requestPermission().then(permission => {
         if (permission !== "granted") showNotifications = false;
     });
 }
 
-// ========== Connection ==========
+// ===== Connection =====
 ably.connection.on("connected", async () => {
     console.log("Connected to Ably ✅");
     loadingScreen.style.display = "none";
     chatContainer.style.display = "flex";
 
     // Enter presence
-    await channel.presence.enter(username);
+    try {
+        await channel.presence.enter(username);
+        updateOnlineCount();
+    } catch (err) {
+        console.error("Failed to enter presence", err);
+    }
 });
 
-// ========== Online Count ==========
-function updateOnlineCount() {
-    channel.presence.get().then(members => {
+// ===== Online Count =====
+async function updateOnlineCount() {
+    try {
+        const members = await channel.presence.get();
         onlineCount.textContent = "Online: " + members.length;
-    });
+    } catch (err) {
+        console.warn("Presence not ready yet", err);
+    }
 }
 
+// Subscribe to presence updates
 channel.presence.subscribe(() => {
     updateOnlineCount();
 });
-setTimeout(updateOnlineCount, 1000);
 
-// ========== Send Message ==========
+// ===== Send Message =====
 function sendMessage() {
     const text = messageInput.value.trim();
     if (!text) return;
@@ -65,7 +80,7 @@ messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
-// ========== Receive Messages ==========
+// ===== Receive Messages =====
 channel.subscribe("message", (msg) => {
     const div = document.createElement("div");
     div.classList.add("message");
@@ -73,7 +88,7 @@ channel.subscribe("message", (msg) => {
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
 
-    // Show web notification if tab not focused
+    // Show notification if tab not focused
     if (showNotifications && "Notification" in window && document.hidden) {
         new Notification("New Message", {
             body: msg.data,
@@ -82,7 +97,7 @@ channel.subscribe("message", (msg) => {
     }
 });
 
-// ========== Change Name ==========
+// ===== Change Name =====
 nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
@@ -90,9 +105,13 @@ nameBtn.addEventListener("click", () => {
     username = newName;
     localStorage.setItem("username", username);
     alert("Name changed to " + username);
+
+    // Update Ably clientId requires reconnecting
+    ably.close();
+    window.location.reload();
 });
 
-// ========== Typing System ==========
+// ===== Typing System =====
 messageInput.addEventListener("input", () => {
     channel.publish("typing", username);
 
@@ -104,11 +123,17 @@ messageInput.addEventListener("input", () => {
 
 channel.subscribe("typing", (msg) => {
     const name = msg.data;
-    if (!name) return;
+
+    if (!name) {
+        typingUsers.clear();
+        updateTypingIndicator();
+        return;
+    }
 
     if (name !== username) {
         typingUsers.add(name);
 
+        // Remove after 2s automatically
         setTimeout(() => {
             typingUsers.delete(name);
             updateTypingIndicator();
@@ -123,14 +148,11 @@ function updateTypingIndicator() {
 
     if (count === 0) {
         typingIndicator.textContent = "";
-    } 
-    else if (count === 1) {
+    } else if (count === 1) {
         typingIndicator.textContent = "Someone is typing...";
-    } 
-    else if (count === 2) {
+    } else if (count === 2) {
         typingIndicator.textContent = "2 people are typing...";
-    } 
-    else {
+    } else {
         typingIndicator.textContent = "3+ people are typing...";
     }
 }
