@@ -6,8 +6,8 @@ localStorage.setItem("username", username);
 
 // ===== PASSWORDS =====
 const channelPasswords = {
-    "private-1": "alpha123",
-    "private-2": "beta123"
+    "private-1": "QSTUV",
+    "private-2": "BPLOT"
 };
 
 // ===== ABLY SETUP =====
