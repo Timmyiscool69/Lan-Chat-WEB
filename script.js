@@ -11,7 +11,7 @@ const channelPasswords = {
 };
 
 // ===== ABLY SETUP =====
-const ably = new Ably.Realtime("PUT_YOUR_KEY_HERE");
+const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
 
 let currentChannelName = "public-chat";
 let channel = ably.channels.get(currentChannelName);
