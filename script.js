@@ -1,4 +1,4 @@
-console.log("Web Chat Script Loaded");
+console.log("Web Chat Script Loaded!");
 
 // Replace with your Ably API key
 const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
