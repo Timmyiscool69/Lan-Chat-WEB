@@ -1,13 +1,12 @@
-console.log("Advanced Multi-Channel Chat Loaded");
+console.log("Multi-Channel Chat Loaded");
 
-// ===== CONFIG =====
-const OPERATOR_USERNAME = "Tommy"; // CHANGE THIS
+// ===== PASSWORDS =====
 const channelPasswords = {
-    "private-1": "SMARTIES123",
-    "private-2": "THEBESTPASSWORD"
+    "private-1": "smart456",
+    "private-2": "yeah200"
 };
 
-// ===== USERNAME SETUP =====
+// ===== USERNAME =====
 let username = localStorage.getItem("username") || 
                "Guest" + Math.floor(Math.random() * 1000);
 
@@ -19,15 +18,12 @@ const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixo
 let currentChannelName = "public-chat";
 let channel = ably.channels.get(currentChannelName);
 
-// ===== MESSAGE STORAGE =====
+// ===== CHANNEL LOG STORAGE =====
 let channelLogs = {
     "public-chat": [],
     "private-1": [],
     "private-2": []
 };
-
-// ===== ACTIVE USERS TRACKING =====
-let activeUsers = new Set();
 
 // DOM
 const chat = document.getElementById("chat");
@@ -36,15 +32,12 @@ const nameInput = document.getElementById("nameInput");
 const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
 
-// ===== DISPLAY NAME WITH PREFIX =====
+// ===== ALWAYS USE WEB PREFIX =====
 function getDisplayName() {
-    if (username === OPERATOR_USERNAME) {
-        return "👑 OP | WEB | " + username;
-    }
     return "WEB | " + username;
 }
 
-// ===== RENDER CHAT FROM STORED LOG =====
+// ===== RENDER CHAT =====
 function renderChannel() {
     chat.innerHTML = "";
     channelLogs[currentChannelName].forEach(msg => {
@@ -64,12 +57,7 @@ function subscribeToChannel() {
     channel.subscribe("message", (msg) => {
         const messageText = msg.data;
 
-        // Save to correct channel log
         channelLogs[currentChannelName].push(messageText);
-
-        // Track usernames
-        const namePart = messageText.split(":")[0];
-        activeUsers.add(namePart);
 
         renderChannel();
     });
@@ -116,21 +104,15 @@ function sendMessage() {
 }
 
 sendBtn.addEventListener("click", sendMessage);
+
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
-// ===== CHANGE NAME WITH DUPLICATE CHECK =====
+// ===== CHANGE NAME =====
 nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
-
-    const formattedName = "WEB | " + newName;
-
-    if (activeUsers.has(formattedName)) {
-        alert("That username is already taken!");
-        return;
-    }
 
     username = newName;
     localStorage.setItem("username", username);
