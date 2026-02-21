@@ -5,11 +5,11 @@ const ably = new Ably.Realtime({
     clientId: "client-" + Math.floor(Math.random() * 1000)
 });
 
-ably.connection.on('connected', () => {
+ably.connection.on("connected", () => {
     console.log("Connected to Ably ✅");
 });
 
-ably.connection.on('failed', (err) => {
+ably.connection.on("failed", (err) => {
     console.error("Connection failed ❌", err);
 });
 
@@ -23,29 +23,36 @@ const nameInput = document.getElementById("nameInput");
 const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
 
-// Send button
-sendBtn.addEventListener("click", () => {
-    const message = messageInput.value.trim();
-    if (message !== "") {
-        channel.publish("message", {
-            name: username,
-            text: message,
-            time: new Date().toLocaleTimeString()
-        });
-        messageInput.value = "";
+sendBtn.addEventListener("click", sendMessage);
+nameBtn.addEventListener("click", changeName);
+
+messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        sendMessage();
     }
 });
 
-// Change name button
-nameBtn.addEventListener("click", () => {
+function sendMessage() {
+    const text = messageInput.value.trim();
+    if (text === "") return;
+
+    channel.publish("message", {
+        name: username,
+        text: text,
+        time: new Date().toLocaleTimeString()
+    });
+
+    messageInput.value = "";
+}
+
+function changeName() {
     const newName = nameInput.value.trim();
     if (newName !== "") {
         username = newName;
         alert("Name changed to " + username);
     }
-});
+}
 
-// Receive messages
 channel.subscribe("message", (msg) => {
     const div = document.createElement("div");
     div.innerText = `[${msg.data.time}] ${msg.data.name}: ${msg.data.text}`;
