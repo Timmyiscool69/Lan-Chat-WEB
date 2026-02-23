@@ -1,55 +1,133 @@
-const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
-let username = localStorage.getItem("username") || ("Guest" + Math.floor(Math.random()*1000));
+console.log("Multi-Channel Chat Loaded!");
+
+// ===== PASSWORDS =====
+const channelPasswords = {
+    "private-1": "smart456",
+    "private-2": "yeah200"
+};
+
+// ===== USERNAME =====
+let username = localStorage.getItem("username") || 
+               "Guest" + Math.floor(Math.random() * 1000);
+
 localStorage.setItem("username", username);
 
-let channel = ably.channels.get("public-chat");
+// ===== ABLY =====
+const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
 
+let currentChannelName = "public-chat";
+let channel = ably.channels.get(currentChannelName);
+
+// ===== CHANNEL LOG STORAGE =====
+let channelLogs = {
+    "public-chat": [],
+    "private-1": [],
+    "private-2": []
+};
+
+// DOM
 const chat = document.getElementById("chat");
-const hintDiv = document.getElementById("hint");
 const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
 const nameInput = document.getElementById("nameInput");
+const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
-const overlay = document.getElementById("overlay");
-const overlayText = document.getElementById("overlay-text");
 
-function renderMessage(msgText) {
-    const div = document.createElement("div");
-    div.textContent = msgText;
-    div.className = "message";
-    if(msgText.startsWith("SYSTEM |")) div.classList.add("SYSTEM");
-    if(msgText.startsWith("HINT |")) div.classList.add("HINT");
-    chat.appendChild(div);
+// ===== ALWAYS USE WEB PREFIX =====
+function getDisplayName() {
+    return "WEB | " + username;
+}
+
+// ===== RENDER CHAT =====
+function renderChannel() {
+    chat.innerHTML = "";
+    channelLogs[currentChannelName].forEach(msg => {
+        const div = document.createElement("div");
+        div.classList.add("message");
+        div.textContent = msg;
+        chat.appendChild(div);
+    });
     chat.scrollTop = chat.scrollHeight;
 }
 
-// Listen for messages
-channel.subscribe("message", msg => {
-    const text = msg.data;
-    if(text.startsWith("HINT |")){
-        hintDiv.textContent = text.replace("HINT | ","");
-    } else if(text.startsWith("SYSTEM | WEB_LOCK | LOCKED")){
-        overlayText.textContent = "Locked by admin!";
-        overlay.style.display = "flex";
-    } else if(text.startsWith("SYSTEM | WEB_LOCK | UNLOCKED")){
-        overlay.style.display = "none";
-    } else {
-        renderMessage(text);
+// ===== SUBSCRIBE =====
+function subscribeToChannel() {
+
+    if(channel) channel.unsubscribe();
+
+    channel = ably.channels.get(currentChannelName);
+
+    channel.subscribe("message", (msg) => {
+        const messageText = msg.data;
+
+        // Only add messages from this channel
+        if(!channelLogs[currentChannelName].includes(messageText)) {
+            channelLogs[currentChannelName].push(messageText);
+        }
+
+        renderChannel();
+    });
+}
+
+// Initial subscription
+subscribeToChannel();
+
+// ===== SWITCH CHANNEL =====
+window.switchChannel = function(newChannel) {
+
+    if (newChannel === currentChannelName) return;
+
+    // Check password
+    if (channelPasswords[newChannel]) {
+        const entered = prompt("Enter password for this channel:");
+        if (entered !== channelPasswords[newChannel]) {
+            alert("Wrong password.");
+            return;
+        }
     }
+
+    currentChannelName = newChannel;
+
+    subscribeToChannel();
+    renderChannel();
+
+    alert("Switched to: " + newChannel);
+};
+
+// ===== SEND MESSAGE =====
+function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text || !channel) return;
+
+    const msg = `${getDisplayName()}: ${text}`;
+
+    // Clear input immediately
+    messageInput.value = "";
+    messageInput.focus();
+
+    channel.publish("message", msg)
+        .catch(err => console.error("Send failed:", err));
+}
+
+sendBtn.addEventListener("click", sendMessage);
+
+messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMessage();
 });
 
-// Send message
-function sendMessage(){
-    if(overlay.style.display === "flex") return; // locked
-    const msg = `WEB | ${username}: ${messageInput.value}`;
-    channel.publish("message", msg);
-    messageInput.value = "";
-}
-sendBtn.addEventListener("click", sendMessage);
-messageInput.addEventListener("keydown", e => { if(e.key==="Enter") sendMessage(); });
-
-// Change name
+// ===== CHANGE NAME =====
 nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
-    if(newName){ username=newName; localStorage.setItem("username", username); }
+    if (!newName) return;
+
+    // Prevent duplicate username in current logs
+    for (let ch in channelLogs) {
+        if (channelLogs[ch].some(m => m.startsWith("WEB | " + newName))) {
+            alert("Username already exists!");
+            return;
+        }
+    }
+
+    username = newName;
+    localStorage.setItem("username", username);
+    alert("Name changed to " + username);
 });
