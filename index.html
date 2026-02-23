@@ -9,16 +9,19 @@
 <body>
 <div id="chatContainer">
     <div id="chat"></div>
-    <input type="text" id="messageInput" placeholder="Type your message..." />
-    <button id="sendBtn">Send</button>
-    <input type="text" id="nameInput" placeholder="Change name..." />
-    <button id="nameBtn">Change</button>
-</div>
 
-<div id="channels">
-    <button onclick="switchChannel('public-chat')">Public</button>
-    <button onclick="switchChannel('private-1')">Private 1</button>
-    <button onclick="switchChannel('private-2')">Private 2</button>
+    <div id="inputArea">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button id="sendBtn">Send</button>
+        <input type="text" id="nameInput" placeholder="Change name..." />
+        <button id="nameBtn">Change</button>
+    </div>
+
+    <div id="channels">
+        <button onclick="switchChannel('public-chat')">Public</button>
+        <button onclick="switchChannel('private-1')">Private 1</button>
+        <button onclick="switchChannel('private-2')">Private 2</button>
+    </div>
 </div>
 
 <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
