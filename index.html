@@ -2,26 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LanChat Web</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lan-Chat Web</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-    <div>
-        <strong>LanChat Web</strong>
-        <select id="channelSelect">
-            <option value="public-chat">Public</option>
-            <option value="private-1">Private 1</option>
-            <option value="private-2">Private 2</option>
-        </select>
-    </div>
-    <button id="changeName">Change Name</button>
-</header>
-<div id="chat"></div>
-<div id="inputBar">
-    <input type="text" id="message" placeholder="Type a message...">
-    <button id="send">Send</button>
+<div id="chatContainer">
+    <div id="chat"></div>
+    <input type="text" id="messageInput" placeholder="Type your message..." />
+    <button id="sendBtn">Send</button>
+    <input type="text" id="nameInput" placeholder="Change name..." />
+    <button id="nameBtn">Change</button>
 </div>
+
+<div id="channels">
+    <button onclick="switchChannel('public-chat')">Public</button>
+    <button onclick="switchChannel('private-1')">Private 1</button>
+    <button onclick="switchChannel('private-2')">Private 2</button>
+</div>
+
 <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 <script src="script.js"></script>
 </body>
