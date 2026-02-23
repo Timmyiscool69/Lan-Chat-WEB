@@ -7,9 +7,7 @@ const channelPasswords = {
 };
 
 // ===== USERNAME =====
-let username = localStorage.getItem("username") || 
-               "Guest" + Math.floor(Math.random() * 1000);
-
+let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random() * 1000);
 localStorage.setItem("username", username);
 
 // ===== ABLY =====
@@ -51,32 +49,21 @@ function renderChannel() {
 
 // ===== SUBSCRIBE =====
 function subscribeToChannel() {
-
-    if(channel) channel.unsubscribe();
-
-    channel = ably.channels.get(currentChannelName);
+    if (channel) channel.unsubscribe();
 
     channel.subscribe("message", (msg) => {
         const messageText = msg.data;
-
-        // Only add messages from this channel
-        if(!channelLogs[currentChannelName].includes(messageText)) {
-            channelLogs[currentChannelName].push(messageText);
-        }
-
+        channelLogs[currentChannelName].push(messageText);
         renderChannel();
     });
 }
 
-// Initial subscription
 subscribeToChannel();
 
 // ===== SWITCH CHANNEL =====
-window.switchChannel = function(newChannel) {
-
+function switchChannel(newChannel) {
     if (newChannel === currentChannelName) return;
 
-    // Check password
     if (channelPasswords[newChannel]) {
         const entered = prompt("Enter password for this channel:");
         if (entered !== channelPasswords[newChannel]) {
@@ -86,21 +73,18 @@ window.switchChannel = function(newChannel) {
     }
 
     currentChannelName = newChannel;
-
+    channel = ably.channels.get(currentChannelName);
     subscribeToChannel();
     renderChannel();
-
     alert("Switched to: " + newChannel);
-};
+}
 
 // ===== SEND MESSAGE =====
 function sendMessage() {
     const text = messageInput.value.trim();
-    if (!text || !channel) return;
+    if (!text) return;
 
     const msg = `${getDisplayName()}: ${text}`;
-
-    // Clear input immediately
     messageInput.value = "";
     messageInput.focus();
 
@@ -109,7 +93,6 @@ function sendMessage() {
 }
 
 sendBtn.addEventListener("click", sendMessage);
-
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
@@ -118,15 +101,6 @@ messageInput.addEventListener("keydown", (e) => {
 nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
-
-    // Prevent duplicate username in current logs
-    for (let ch in channelLogs) {
-        if (channelLogs[ch].some(m => m.startsWith("WEB | " + newName))) {
-            alert("Username already exists!");
-            return;
-        }
-    }
-
     username = newName;
     localStorage.setItem("username", username);
     alert("Name changed to " + username);
