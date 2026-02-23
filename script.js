@@ -1,24 +1,21 @@
-console.log("Multi-Channel Chat Loaded!");
+console.log("LanChat Web Loaded!");
 
-// ===== PASSWORDS =====
+// ===== CHANNEL PASSWORDS =====
 const channelPasswords = {
     "private-1": "smart456",
     "private-2": "yeah200"
 };
 
 // ===== USERNAME =====
-let username = localStorage.getItem("username") || 
-               "Guest" + Math.floor(Math.random() * 1000);
-
+let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random()*1000);
 localStorage.setItem("username", username);
 
 // ===== ABLY =====
-const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
-
+const ably = new Ably.Realtime('75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg');
 let currentChannelName = "public-chat";
 let channel = ably.channels.get(currentChannelName);
 
-// ===== CHANNEL LOG STORAGE =====
+// ===== CHANNEL LOGS =====
 let channelLogs = {
     "public-chat": [],
     "private-1": [],
@@ -26,13 +23,12 @@ let channelLogs = {
 };
 
 // DOM
-const chat = document.getElementById("chat");
-const messageInput = document.getElementById("messageInput");
-const nameInput = document.getElementById("nameInput");
-const sendBtn = document.getElementById("sendBtn");
-const nameBtn = document.getElementById("nameBtn");
+const chat = document.getElementById('chat');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const lockOverlay = document.getElementById('lockOverlay');
 
-// ===== ALWAYS USE WEB PREFIX =====
+// ===== DISPLAY NAME =====
 function getDisplayName() {
     return "WEB | " + username;
 }
@@ -42,8 +38,12 @@ function renderChannel() {
     chat.innerHTML = "";
     channelLogs[currentChannelName].forEach(msg => {
         const div = document.createElement("div");
-        div.classList.add("message");
-        div.textContent = msg;
+        div.className = "message";
+        div.innerHTML = `<span>${msg}</span><button>X</button>`;
+        div.querySelector('button').onclick = () => {
+            div.remove();
+            channel.publish('delete-message', msg);
+        };
         chat.appendChild(div);
     });
     chat.scrollTop = chat.scrollHeight;
@@ -51,83 +51,55 @@ function renderChannel() {
 
 // ===== SUBSCRIBE =====
 function subscribeToChannel() {
-
-    if(channel) channel.unsubscribe();
-
-    channel = ably.channels.get(currentChannelName);
-
-    channel.subscribe("message", (msg) => {
-        const messageText = msg.data;
-
-        // Only add messages from this channel
-        if(!channelLogs[currentChannelName].includes(messageText)) {
-            channelLogs[currentChannelName].push(messageText);
-        }
-
+    channel.unsubscribe();
+    channel.subscribe("message", msg => {
+        channelLogs[currentChannelName].push(msg.data);
         renderChannel();
     });
+    channel.subscribe("delete-message", msg => {
+        const idx = channelLogs[currentChannelName].indexOf(msg.data);
+        if(idx !== -1) channelLogs[currentChannelName].splice(idx, 1);
+        renderChannel();
+    });
+    channel.subscribe("lock-web", () => lockOverlay.style.display = "block");
+    channel.subscribe("unlock-web", () => lockOverlay.style.display = "none");
 }
-
-// Initial subscription
 subscribeToChannel();
 
 // ===== SWITCH CHANNEL =====
-window.switchChannel = function(newChannel) {
+function switchChannel(newChannel) {
+    if(newChannel === currentChannelName) return;
 
-    if (newChannel === currentChannelName) return;
-
-    // Check password
-    if (channelPasswords[newChannel]) {
-        const entered = prompt("Enter password for this channel:");
-        if (entered !== channelPasswords[newChannel]) {
-            alert("Wrong password.");
+    if(channelPasswords[newChannel]) {
+        const entered = prompt("Enter password:");
+        if(entered !== channelPasswords[newChannel]) {
+            alert("Wrong password");
             return;
         }
     }
 
     currentChannelName = newChannel;
-
+    channel = ably.channels.get(currentChannelName);
     subscribeToChannel();
     renderChannel();
-
-    alert("Switched to: " + newChannel);
-};
+    alert("Switched to " + newChannel);
+}
 
 // ===== SEND MESSAGE =====
 function sendMessage() {
     const text = messageInput.value.trim();
-    if (!text || !channel) return;
-
+    if(!text) return;
     const msg = `${getDisplayName()}: ${text}`;
-
-    // Clear input immediately
     messageInput.value = "";
     messageInput.focus();
-
-    channel.publish("message", msg)
-        .catch(err => console.error("Send failed:", err));
+    channel.publish("message", msg);
 }
 
-sendBtn.addEventListener("click", sendMessage);
+sendBtn.onclick = sendMessage;
+messageInput.addEventListener("keydown", e => { if(e.key === "Enter") sendMessage(); });
 
-messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
-
-// ===== CHANGE NAME =====
-nameBtn.addEventListener("click", () => {
-    const newName = nameInput.value.trim();
-    if (!newName) return;
-
-    // Prevent duplicate username in current logs
-    for (let ch in channelLogs) {
-        if (channelLogs[ch].some(m => m.startsWith("WEB | " + newName))) {
-            alert("Username already exists!");
-            return;
-        }
-    }
-
+// ===== CHANGE USERNAME =====
+window.changeUsername = function(newName) {
     username = newName;
     localStorage.setItem("username", username);
-    alert("Name changed to " + username);
-});
+};
