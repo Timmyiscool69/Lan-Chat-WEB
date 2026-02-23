@@ -1,29 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>LanChat Web</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>LanChat Web</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="lockOverlay">Web locked by admin</div>
-
-    <div id="chatContainer">
-        <div id="chat"></div>
-
-        <div id="inputPanel">
-            <input type="text" id="messageInput" placeholder="Type a message..." />
-            <button id="sendBtn">Send</button>
-        </div>
-    </div>
-
-    <div id="channelButtons">
-        <button onclick="switchChannel('public-chat')">Public</button>
-        <button onclick="switchChannel('private-1')">Private 1</button>
-        <button onclick="switchChannel('private-2')">Private 2</button>
-    </div>
-
-    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-    <script src="script.js"></script>
+<div id="overlay" style="display:none;">
+    <div id="overlay-text"></div>
+</div>
+<div id="chat-container">
+    <div id="hint"></div>
+    <div id="chat"></div>
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button id="sendBtn">SEND</button>
+    <input type="text" id="nameInput" placeholder="Set name">
+    <button id="nameBtn">Change Name</button>
+</div>
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
