@@ -6,16 +6,21 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="overlay" style="display:none;">
-    <div id="overlay-text"></div>
-</div>
-<div id="chat-container">
-    <div id="hint"></div>
-    <div id="chat"></div>
-    <input type="text" id="messageInput" placeholder="Type a message...">
-    <button id="sendBtn">SEND</button>
-    <input type="text" id="nameInput" placeholder="Set name">
-    <button id="nameBtn">Change Name</button>
+<header>
+    <div>
+        <strong>LanChat Web</strong>
+        <select id="channelSelect">
+            <option value="public-chat">Public</option>
+            <option value="private-1">Private 1</option>
+            <option value="private-2">Private 2</option>
+        </select>
+    </div>
+    <button id="changeName">Change Name</button>
+</header>
+<div id="chat"></div>
+<div id="inputBar">
+    <input type="text" id="message" placeholder="Type a message...">
+    <button id="send">Send</button>
 </div>
 <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 <script src="script.js"></script>
