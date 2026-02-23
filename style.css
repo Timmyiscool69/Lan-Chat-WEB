@@ -1,116 +1,53 @@
 body {
     margin: 0;
-    background: #0f172a;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    font-family: "Segoe UI", sans-serif;
+    background-color: #121212;
+    color: #fff;
 }
 
-/* Main Container */
-.chat-container {
-    width: 900px;
-    height: 650px;
-    background: #1e293b;
-    border-radius: 20px;
+#chatContainer {
+    width: 600px;
+    margin: 20px auto;
     display: flex;
     flex-direction: column;
-    padding: 25px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
 }
 
-/* Title */
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 28px;
-}
-
-/* Channel Buttons */
-.channel-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.channel-bar button {
-    flex: 1;
-    background: #475569;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.channel-bar button:hover {
-    background: #334155;
-}
-
-/* Chat Area */
 #chat {
     flex: 1;
+    height: 400px;
+    background-color: #1e1e1e;
     overflow-y: auto;
-    background: #0f172a;
-    padding: 20px;
-    border-radius: 15px;
-    margin-bottom: 15px;
-    font-size: 17px;
-}
-
-/* Individual Message */
-.message {
-    margin-bottom: 12px;
-    padding: 10px 14px;
-    background: #334155;
-    border-radius: 12px;
-    word-wrap: break-word;
-}
-
-/* Input Sections */
-.input-area,
-.name-area {
-    display: flex;
-    gap: 10px;
+    padding: 10px;
+    border-radius: 5px;
     margin-bottom: 10px;
 }
 
-/* Inputs */
-input {
-    flex: 1;
-    padding: 14px;
-    border-radius: 10px;
+#messageInput, #nameInput {
+    padding: 10px;
     border: none;
-    font-size: 15px;
-    outline: none;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    width: calc(100% - 22px);
+    background-color: #2c2c2c;
+    color: #fff;
 }
 
-/* Buttons */
-button {
-    background: #3b82f6;
+#sendBtn, #nameBtn {
+    padding: 10px;
     border: none;
-    padding: 14px 20px;
-    border-radius: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    background-color: #0a84ff;
     color: white;
-    font-size: 15px;
     cursor: pointer;
-    transition: 0.2s ease;
 }
 
-button:hover {
-    background: #2563eb;
-}
-
-/* Scrollbar Styling */
-#chat::-webkit-scrollbar {
-    width: 8px;
-}
-
-#chat::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 4px;
+#channels button {
+    padding: 5px 10px;
+    margin: 2px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+    cursor: pointer;
 }
