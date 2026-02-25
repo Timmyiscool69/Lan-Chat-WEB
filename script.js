@@ -1,6 +1,6 @@
-// LanChat Web v4.0 - DEBUG MODE (loading fix + error handling)
 
-console.log("LanChat Web starting... DEBUG MODE ACTIVE!");
+
+console.log("LanChat Web starting... DEBUG MODE ACTIVE!!");
 
 const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
 
