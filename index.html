@@ -5,13 +5,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Brief loading while fetching system state -->
-    <div id="loadingScreen">Loading...</div>
+    <div id="loadingScreen">Loading control system...</div>
 
     <div class="chat-container">
         <h1>🌎 LanChat Web</h1>
 
-        <!-- Hint bar – appears at top when active -->
         <div id="hintBar" class="hint-bar"></div>
 
         <!-- Channel Switcher -->
@@ -37,19 +35,15 @@
         </div>
     </div>
 
-    <!-- Overlays -->
-    <div id="lockOverlay" class="overlay lock-overlay">
-        <div class="overlay-content">
-            <h2>Chat is Locked</h2>
-            <p>Admin has temporarily disabled chatting.</p>
-        </div>
+    <!-- Overlays – only show when active -->
+    <div id="lockOverlay" class="overlay">
+        <h2>Chat Locked</h2>
+        <p>Admin has disabled sending messages for now.</p>
     </div>
 
-    <div id="updateOverlay" class="overlay update-overlay">
-        <div class="overlay-content">
-            <h2>Updating...</h2>
-            <p>Please wait – the chat is being updated.</p>
-        </div>
+    <div id="updateOverlay" class="overlay">
+        <h2>Updating...</h2>
+        <p>Hold tight – refreshing soon.</p>
     </div>
 
     <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
