@@ -5,37 +5,54 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Brief loading while fetching system state -->
+    <div id="loadingScreen">Loading...</div>
 
-<div class="chat-container">
+    <div class="chat-container">
+        <h1>🌎 LanChat Web</h1>
 
-    <h1>🌎 LanChat Web</h1>
+        <!-- Hint bar – appears at top when active -->
+        <div id="hintBar" class="hint-bar"></div>
 
-    <!-- Channel Switcher -->
-    <div class="channel-bar">
-        <button onclick="switchChannel('public-chat')">Public</button>
-        <button onclick="switchChannel('private-1')">Private 1</button>
-        <button onclick="switchChannel('private-2')">Private 2</button>
+        <!-- Channel Switcher -->
+        <div class="channel-bar">
+            <button onclick="switchChannel('public-chat')">Public</button>
+            <button onclick="switchChannel('private-1')">Private 1</button>
+            <button onclick="switchChannel('private-2')">Private 2</button>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat"></div>
+
+        <!-- Message Input -->
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type a message..." />
+            <button id="sendBtn">Send</button>
+        </div>
+
+        <!-- Name Change -->
+        <div class="name-area">
+            <input type="text" id="nameInput" placeholder="Change name..." />
+            <button id="nameBtn">Set Name</button>
+        </div>
     </div>
 
-    <!-- Chat Messages -->
-    <div id="chat"></div>
-
-    <!-- Message Input -->
-    <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Type a message..." />
-        <button id="sendBtn">Send</button>
+    <!-- Overlays -->
+    <div id="lockOverlay" class="overlay lock-overlay">
+        <div class="overlay-content">
+            <h2>Chat is Locked</h2>
+            <p>Admin has temporarily disabled chatting.</p>
+        </div>
     </div>
 
-    <!-- Name Change -->
-    <div class="name-area">
-        <input type="text" id="nameInput" placeholder="Change name..." />
-        <button id="nameBtn">Set Name</button>
+    <div id="updateOverlay" class="overlay update-overlay">
+        <div class="overlay-content">
+            <h2>Updating...</h2>
+            <p>Please wait – the chat is being updated.</p>
+        </div>
     </div>
 
-</div>
-
-<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-<script src="script.js"></script>
-
+    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
