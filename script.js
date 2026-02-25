@@ -1,22 +1,22 @@
+console.log("Multi-Channel Chat Loaded!");
 
+// ===== PASSWORDS =====
+const channelPasswords = {
+    "private-1": "smart456",
+    "private-2": "yeah200"
+};
 
-console.log("LanChat Web starting... DEBUG MODE ACTIVE!!");
+// ===== USERNAME =====
+let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random() * 1000);
+localStorage.setItem("username", username);
 
+// ===== ABLY =====
 const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
 
 let currentChannelName = "public-chat";
 let channel = ably.channels.get(currentChannelName);
-let systemChannel = ably.channels.get("system");
 
-let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random() * 1000);
-localStorage.setItem("username", username);
-
-// System states
-let isLocked = false;
-let hintText = "";
-let isUpdating = false;
-
-// Logs
+// ===== CHANNEL LOG STORAGE =====
 let channelLogs = {
     "public-chat": [],
     "private-1": [],
@@ -24,172 +24,84 @@ let channelLogs = {
 };
 
 // DOM
-const chatDiv = document.getElementById("chat");
+const chat = document.getElementById("chat");
 const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
 const nameInput = document.getElementById("nameInput");
+const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
-const hintBar = document.getElementById("hintBar");
-const lockOverlay = document.getElementById("lockOverlay");
-const updateOverlay = document.getElementById("updateOverlay");
-const loadingScreen = document.getElementById("loadingScreen");
 
-// Force hide loading after 10s as safety net
-setTimeout(() => {
-    if (loadingScreen.style.display !== "none") {
-        console.warn("FORCE HIDING LOADING SCREEN - system channel likely failed");
-        loadingScreen.style.display = "none";
-        alert("Connection to control system timed out. Chat is loading anyway (admin features like lock/hint may not work). Check console for errors.");
-    }
-}, 10000);
-
-// Display name
+// ===== ALWAYS USE WEB PREFIX =====
 function getDisplayName() {
     return "WEB | " + username;
 }
 
-// Render messages
-function renderChat() {
-    chatDiv.innerHTML = "";
-    (channelLogs[currentChannelName] || []).forEach(msg => {
+// ===== RENDER CHAT =====
+function renderChannel() {
+    chat.innerHTML = "";
+    channelLogs[currentChannelName].forEach(msg => {
         const div = document.createElement("div");
-        div.className = "message";
+        div.classList.add("message");
         div.textContent = msg;
-        chatDiv.appendChild(div);
+        chat.appendChild(div);
     });
-    chatDiv.scrollTop = chatDiv.scrollHeight;
+    chat.scrollTop = chat.scrollHeight;
 }
 
-// Subscribe main channel
-function subscribeMainChannel() {
-    console.log("Subscribing to main channel:", currentChannelName);
+// ===== SUBSCRIBE =====
+function subscribeToChannel() {
     if (channel) channel.unsubscribe();
-    channel = ably.channels.get(currentChannelName);
 
     channel.subscribe("message", (msg) => {
-        const text = msg.data;
-        if (!channelLogs[currentChannelName].includes(text)) {
-            channelLogs[currentChannelName].push(text);
-            renderChat();
-        }
+        const messageText = msg.data;
+        channelLogs[currentChannelName].push(messageText);
+        renderChannel();
     });
 }
 
-// Process admin command
-function processSystemCommand(msg) {
-    console.log("System message received:", msg.data);
-    const text = msg.data.trim().toLowerCase();
+subscribeToChannel();
 
-    if (text === "web-lock") isLocked = true;
-    else if (text === "web-unlock") isLocked = false;
-    else if (text.startsWith("hint:")) hintText = msg.data.substring(5).trim();
-    else if (text === "update") isUpdating = true;
-    else if (text === "update-finish") location.reload();
+// ===== SWITCH CHANNEL =====
+function switchChannel(newChannel) {
+    if (newChannel === currentChannelName) return;
 
-    updateUIState();
-}
-
-// UI update
-function updateUIState() {
-    if (isUpdating) {
-        updateOverlay.style.display = "flex";
-        messageInput.disabled = sendBtn.disabled = nameInput.disabled = nameBtn.disabled = true;
-        return;
-    }
-    updateOverlay.style.display = "none";
-
-    if (isLocked) {
-        lockOverlay.style.display = "flex";
-        messageInput.disabled = sendBtn.disabled = nameInput.disabled = nameBtn.disabled = true;
-    } else {
-        lockOverlay.style.display = "none";
-        messageInput.disabled = sendBtn.disabled = nameInput.disabled = nameBtn.disabled = false;
-    }
-
-    hintBar.textContent = hintText;
-    hintBar.style.display = hintText ? "block" : "none";
-}
-
-// System channel setup with FULL error handling
-console.log("Attaching to system channel...");
-systemChannel.attach((err) => {
-    if (err) {
-        console.error("SYSTEM ATTACH FAILED:", err.code, err.message, err);
-        alert("Failed to connect to admin control channel: " + (err.message || "Unknown error") + " (code: " + (err.code || "?") + "). Chat loading without admin features.");
-        loadingScreen.style.display = "none";
-        subscribeMainChannel();
-        renderChat();
-        return;
-    }
-
-    console.log("System channel attached OK");
-
-    systemChannel.history({ limit: 100, direction: "backwards" }, (err, page) => {
-        if (err) {
-            console.error("SYSTEM HISTORY FAILED:", err.code, err.message, err);
-            alert("Couldn't load admin history: " + (err.message || "Unknown") + ". Admin features may be incomplete.");
-        } else {
-            console.log("History loaded:", page.items.length, "messages");
-            page.items.reverse().forEach(processSystemCommand);
-        }
-
-        loadingScreen.style.display = "none";
-        updateUIState();
-
-        systemChannel.subscribe("message", processSystemCommand);
-        console.log("Now listening for new system messages");
-
-        // Start main chat
-        subscribeMainChannel();
-        renderChat();
-    });
-});
-
-// Channel switch (unchanged)
-window.switchChannel = function(channelName) {
-    if (channelName === currentChannelName) return;
-
-    const passwords = { "private-1": "smart456", "private-2": "yeah200" };
-
-    if (passwords[channelName]) {
-        const pw = prompt("Password for " + channelName + ":");
-        if (pw !== passwords[channelName]) {
+    if (channelPasswords[newChannel]) {
+        const entered = prompt("Enter password for this channel:");
+        if (entered !== channelPasswords[newChannel]) {
             alert("Wrong password.");
             return;
         }
     }
 
-    currentChannelName = channelName;
-    subscribeMainChannel();
-    renderChat();
-    alert("Switched to: " + channelName);
-};
-
-// Send
-function sendMessage() {
-    const text = messageInput.value.trim();
-    if (!text || isLocked || isUpdating) return;
-
-    const fullMsg = getDisplayName() + ": " + text;
-    messageInput.value = "";
-
-    channel.publish("message", fullMsg).catch(err => console.error("Send failed:", err));
+    currentChannelName = newChannel;
+    channel = ably.channels.get(currentChannelName);
+    subscribeToChannel();
+    renderChannel();
+    alert("Switched to: " + newChannel);
 }
 
-sendBtn.onclick = sendMessage;
-messageInput.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+// ===== SEND MESSAGE =====
+function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text) return;
 
-// Name change
-nameBtn.onclick = () => {
+    const msg = `${getDisplayName()}: ${text}`;
+    messageInput.value = "";
+    messageInput.focus();
+
+    channel.publish("message", msg)
+        .catch(err => console.error("Send failed:", err));
+}
+
+sendBtn.addEventListener("click", sendMessage);
+messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
+
+// ===== CHANGE NAME =====
+nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
-    if (!newName || isLocked || isUpdating) return;
-
-    if (channelLogs[currentChannelName].some(m => m.startsWith("WEB | " + newName + ":"))) {
-        alert("Name already used here.");
-        return;
-    }
-
+    if (!newName) return;
     username = newName;
     localStorage.setItem("username", username);
-    alert("Name set to: " + username);
-};
+    alert("Name changed to " + username);
+});
