@@ -1,65 +1,55 @@
-/* Your existing styles remain here — just add/replace the following: */
+/* Add these at the bottom or merge carefully */
 
+/* Loading (brief overlay) */
 #loadingScreen {
     position: fixed;
-    inset: 0;
-    background: #0f172a;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
     color: white;
+    font-size: 1.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    z-index: 2000;
+    z-index: 9999;
 }
 
+/* Hint – slim bar inside container */
 .hint-bar {
-    background: #fef08a;
-    color: #1e293b;
-    padding: 10px 15px;
+    background: #ffff99;
+    color: #333;
+    padding: 8px;
     margin: 10px 0;
-    border-radius: 8px;
+    border-radius: 6px;
     text-align: center;
-    font-weight: bold;
+    font-size: 1rem;
     display: none;
 }
 
+/* Overlays – full screen but simple & non-intrusive when hidden */
 .overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.92);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    color: white;
     display: none;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    font-size: 1.8rem;
 }
 
-.overlay-content {
-    background: #1e293b;
-    padding: 30px 50px;
-    border-radius: 16px;
-    text-align: center;
-    max-width: 500px;
+.overlay h2 {
+    margin: 0 0 15px;
 }
 
-.lock-overlay h2 {
-    color: #f87171;
+.overlay p {
+    font-size: 1.1rem;
+    opacity: 0.9;
 }
 
-.update-overlay h2 {
-    color: #fbbf24;
-}
-
-.message {
-    /* Make sure your message class exists — if not, add: */
-    margin: 8px 0;
-    padding: 10px 14px;
-    background: #334155;
-    border-radius: 10px;
-    word-break: break-word;
-}
-
-/* Optional: disable pointer events on inputs when locked/updating (extra safety) */
+/* Disable inputs/buttons when locked/updating */
 input:disabled, button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
 }
