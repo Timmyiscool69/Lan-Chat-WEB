@@ -1,87 +1,65 @@
-body {
-    margin: 0;
-    background: #0f172a;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
+/* Your existing styles remain here — just add/replace the following: */
 
 #loadingScreen {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: #0f172a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
     color: white;
-}
-
-.chat-container {
-    width: 900px;
-    height: 650px;
-    background: #1e293b;
-    border-radius: 18px;
     display: flex;
-    flex-direction: column;
-    padding: 25px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    z-index: 2000;
 }
 
-h1 {
+.hint-bar {
+    background: #fef08a;
+    color: #1e293b;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 8px;
     text-align: center;
-    margin-bottom: 20px;
-    font-size: 28px;
+    font-weight: bold;
+    display: none;
 }
 
-#chat {
-    flex: 1;
-    overflow-y: auto;
-    background: #0f172a;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    font-size: 18px;
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.overlay-content {
+    background: #1e293b;
+    padding: 30px 50px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 500px;
+}
+
+.lock-overlay h2 {
+    color: #f87171;
+}
+
+.update-overlay h2 {
+    color: #fbbf24;
 }
 
 .message {
-    margin-bottom: 12px;
+    /* Make sure your message class exists — if not, add: */
+    margin: 8px 0;
     padding: 10px 14px;
     background: #334155;
     border-radius: 10px;
+    word-break: break-word;
 }
 
-.input-area,
-.name-area {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 10px;
-}
-
-input {
-    flex: 1;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    font-size: 16px;
-}
-
-button {
-    background: #3b82f6;
-    border: none;
-    padding: 14px 22px;
-    border-radius: 10px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #2563eb;
+/* Optional: disable pointer events on inputs when locked/updating (extra safety) */
+input:disabled, button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
