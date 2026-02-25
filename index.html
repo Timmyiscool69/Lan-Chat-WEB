@@ -5,48 +5,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="loadingScreen">Loading...</div>
 
-    <div class="chat-container">
-        <h1>🌎 LanChat Web</h1>
+<div id="loadingScreen">
+    <div class="loader">Connecting...</div>
+</div>
 
-        <div id="hintBar" class="hint-bar"></div>
+<div class="chat-container" style="display:none;">
+    <h1>🌎 LanChat Web</h1>
 
-        <!-- Channel Switcher -->
-        <div class="channel-bar">
-            <button onclick="switchChannel('public-chat')">Public</button>
-            <button onclick="switchChannel('private-1')">Private 1</button>
-            <button onclick="switchChannel('private-2')">Private 2</button>
-        </div>
+    <div id="chat"></div>
 
-        <!-- Chat Messages -->
-        <div id="chat"></div>
-
-        <!-- Message Input -->
-        <div class="input-area">
-            <input type="text" id="messageInput" placeholder="Type a message..." />
-            <button id="sendBtn">Send</button>
-        </div>
-
-        <!-- Name Change -->
-        <div class="name-area">
-            <input type="text" id="nameInput" placeholder="Change name..." />
-            <button id="nameBtn">Set Name</button>
-        </div>
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type message..." />
+        <button id="sendBtn">Send</button>
     </div>
 
-    <!-- Overlays – only show when active -->
-    <div id="lockOverlay" class="overlay">
-        <h2>Chat Locked</h2>
-        <p>Admin has disabled sending messages for now.</p>
+    <div class="name-area">
+        <input type="text" id="nameInput" placeholder="Change name" />
+        <button id="nameBtn">Set Name</button>
     </div>
+</div>
 
-    <div id="updateOverlay" class="overlay">
-        <h2>Updating...</h2>
-        <p>Hold tight – refreshing soon.</p>
-    </div>
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+<script src="script.js"></script>
 
-    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>
