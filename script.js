@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V3.5 HOTFIX");
+console.log("Multi-Channel Chat Loaded! V3.6 HOTFIX");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
