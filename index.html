@@ -1,17 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>LanChat Web</title>
-    <link rel="stylesheet" href="style.css">
-</head>
 <body>
-    <!-- Loading screen – visible by default -->
-    <div id="loadingScreen">
+    <div id="loadingScreen" style="display: none;">
         <div class="loader">Connecting...</div>
     </div>
-
-    <!-- Main chat – start hidden -->
-    <div class="chat-container" style="display: none;">
+    <div class="chat-container">  <!-- remove style="display:none;" if present -->
         <h1>🌎 LanChat Web</h1>
         <div id="chat"></div>
         <div class="input-area">
@@ -23,8 +14,6 @@
             <button id="nameBtn">Set Name</button>
         </div>
     </div>
-
     <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
     <script src="script.js"></script>
 </body>
-</html>
