@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V3 FIX 3.3");
+console.log("Multi-Channel Chat Loaded! V3.4");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -12,11 +12,10 @@ let username = localStorage.getItem("username") ||
 localStorage.setItem("username", username);
 
 // ===== ABLY =====
-const ABLY_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg"; // Consider moving to env var later
-const ably = new Ably.Realtime(ABLY_KEY);
+const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
 
 let currentChannelName = "public-chat";
-let channel = null; // Will be set after connection
+let channel = null;  // Start null, set after connect
 
 // ===== CHANNEL LOG STORAGE =====
 let channelLogs = {
@@ -32,8 +31,7 @@ const nameInput = document.getElementById("nameInput");
 const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
 
-// Assume you have a status element — add this to index.html if missing:
-// <div id="status" style="color: #666; text-align: center; padding: 20px;">Connecting to chat...</div>
+// Fallback status element (won't show unless you add <div id="status"> in HTML)
 const statusEl = document.getElementById("status") || document.createElement("div");
 
 // ===== DISPLAY NAME =====
@@ -44,7 +42,7 @@ function getDisplayName() {
 // ===== RENDER CHAT =====
 function renderChannel() {
     chat.innerHTML = "";
-    (channelLogs[currentChannelName] || []).forEach(msg => {
+    channelLogs[currentChannelName].forEach(msg => {
         const div = document.createElement("div");
         div.classList.add("message");
         div.textContent = msg;
@@ -53,121 +51,87 @@ function renderChannel() {
     chat.scrollTop = chat.scrollHeight;
 }
 
-// ===== SUBSCRIBE TO CHANNEL =====
+// ===== SUBSCRIBE =====
 function subscribeToChannel() {
-    if (channel) {
-        channel.unsubscribe();
-    }
+    if (channel) channel.unsubscribe();
     channel = ably.channels.get(currentChannelName);
-
     channel.subscribe("message", (msg) => {
         const messageText = msg.data;
-        if (!channelLogs[currentChannelName].includes(messageText)) {
-            channelLogs[currentChannelName].push(messageText);
-            renderChannel();
-        }
+        // Removed includes() check → allows duplicate/repeated messages
+        channelLogs[currentChannelName].push(messageText);
+        renderChannel();
     });
-
-    console.log(`Subscribed to channel: ${currentChannelName}`);
+    console.log(`Subscribed to ${currentChannelName}`);
 }
 
 // ===== SWITCH CHANNEL =====
-window.switchChannel = function(newChannel) {
+function switchChannel(newChannel) {
     if (newChannel === currentChannelName) return;
-
-    // Check password for private channels
     if (channelPasswords[newChannel]) {
-        const entered = prompt("Enter password for " + newChannel + ":");
+        const entered = prompt("Enter password for this channel:");
         if (entered !== channelPasswords[newChannel]) {
-            alert("Wrong password!");
+            alert("Wrong password.");
             return;
         }
     }
-
     currentChannelName = newChannel;
     subscribeToChannel();
     renderChannel();
     alert("Switched to: " + newChannel);
-};
+}
 
 // ===== SEND MESSAGE =====
 function sendMessage() {
     if (!channel) {
-        alert("Not connected yet — please wait.");
+        console.warn("Cannot send: not connected yet");
         return;
     }
     const text = messageInput.value.trim();
     if (!text) return;
-
     const msg = `${getDisplayName()}: ${text}`;
     messageInput.value = "";
     messageInput.focus();
-
-    channel.publish("message", msg)
-        .then(() => console.log("Message sent"))
-        .catch(err => {
-            console.error("Send failed:", err);
-            alert("Failed to send message: " + err.message);
-        });
+    channel.publish("message", msg);  // No .then/.catch – old Ably version doesn't support it
 }
 
+// ===== EVENT LISTENERS =====
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-        sendMessage();
-    }
+    if (e.key === "Enter") sendMessage();
 });
 
 // ===== CHANGE NAME =====
 nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
-
-    // Simple duplicate check (not perfect, but ok for now)
-    for (let ch in channelLogs) {
-        if (channelLogs[ch].some(m => m.startsWith("WEB | " + newName + ":"))) {
-            alert("That username is already in use in some channel!");
-            return;
-        }
-    }
-
     username = newName;
     localStorage.setItem("username", username);
     alert("Name changed to " + username);
 });
 
-// ===== CONNECTION HANDLING =====
+// ===== CONNECTION HANDLING – THIS FIXES THE LOADING SCREEN =====
+ably.connection.on("connecting", () => {
+    statusEl.textContent = "Connecting...";
+});
+
 ably.connection.on("connected", () => {
     console.log("Ably connected!");
-    statusEl.textContent = "Connected!";   // ← if you still have statusEl
-    statusEl.style.color = "green";
-
-    // NEW: Hide loading screen and show the actual chat
+    // Hide loader, show chat
     document.getElementById("loadingScreen").style.display = "none";
-    document.querySelector(".chat-container").style.display = "block";
-
-    // Optional: brief "Connected!" flash (remove if unwanted)
-    // setTimeout(() => { document.getElementById("loadingScreen").style.display = "none"; }, 1500);
-
+    document.querySelector(".chat-container").style.display = "block";  // or "flex" if your CSS needs it
     subscribeToChannel();
-    renderChannel();
+    renderChannel();  // Show any cached messages (though usually empty at start)
 });
 
 ably.connection.on("failed", (err) => {
-    console.error("Ably connection failed:", err);
-    statusEl.textContent = "Connection failed: " + (err.reason?.message || "Unknown error");
-    statusEl.style.color = "red";
+    console.error("Connection failed:", err);
+    statusEl.textContent = "Connection failed – check console";
+    // Optional: keep loader or show error in UI
 });
 
 ably.connection.on("disconnected", () => {
-    console.log("Ably disconnected");
-    statusEl.textContent = "Disconnected — reconnecting...";
-    statusEl.style.color = "orange";
-});
-
-ably.connection.on("connecting", () => {
-    statusEl.textContent = "Connecting...";
-    statusEl.style.color = "#666";
+    console.log("Disconnected");
+    // Optional: show loader again or status
 });
 
 // Initial state
