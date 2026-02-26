@@ -33,19 +33,19 @@ body {
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: hidden; /* hard lock container height */
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 28px;
-    flex: 0 0 auto;
+    flex: 0 0 auto; /* fixed height element */
 }
 
 #chat {
-    flex: 1;               /* 🔥 this is enough */
-    min-height: 0;         /* 🔥 critical for flex scroll */
+    flex: 1 1 0%;   /* 🔥 critical fix */
+    min-height: 0;  /* 🔥 required for flex scrolling */
     overflow-y: auto;
     overflow-x: hidden;
     background: #0f172a;
@@ -57,18 +57,21 @@ h1 {
     scrollbar-color: #64748b #1e293b;
 }
 
-/* Scrollbar */
+/* Webkit scrollbar styling */
 #chat::-webkit-scrollbar {
     width: 8px;
 }
+
 #chat::-webkit-scrollbar-track {
     background: #1e293b;
     border-radius: 10px;
 }
+
 #chat::-webkit-scrollbar-thumb {
     background: #64748b;
     border-radius: 10px;
 }
+
 #chat::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
@@ -88,7 +91,7 @@ h1 {
     display: flex;
     gap: 12px;
     margin-bottom: 10px;
-    flex: 0 0 auto;
+    flex: 0 0 auto; /* prevents flex resizing */
 }
 
 input {
