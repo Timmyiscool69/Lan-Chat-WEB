@@ -25,19 +25,21 @@ body {
 
 .chat-container {
     width: 900px;
-    height: 650px;
+    height: 650px;                  /* kept exactly as is */
     background: #1e293b;
     border-radius: 18px;
     display: flex;
     flex-direction: column;
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    box-sizing: border-box;         /* added: prevents padding from increasing total size */
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 28px;
+    flex-shrink: 0;                 /* added: header won't compress */
 }
 
 #chat {
@@ -48,6 +50,27 @@ h1 {
     border-radius: 12px;
     margin-bottom: 20px;
     font-size: 18px;
+    scrollbar-width: thin;          /* nicer thin scrollbar (Firefox) */
+    scrollbar-color: #64748b #1e293b; /* custom colors to match theme */
+}
+
+/* Webkit browsers (Chrome, Edge, Safari) scrollbar styling */
+#chat::-webkit-scrollbar {
+    width: 8px;
+}
+
+#chat::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-radius: 10px;
+}
+
+#chat::-webkit-scrollbar-thumb {
+    background: #64748b;
+    border-radius: 10px;
+}
+
+#chat::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .message {
@@ -55,6 +78,8 @@ h1 {
     padding: 10px 14px;
     background: #334155;
     border-radius: 10px;
+    word-wrap: break-word;          /* added: prevents super long words from breaking layout */
+    max-width: 85%;                 /* added: messages don't stretch full width awkwardly */
 }
 
 .input-area,
@@ -62,6 +87,7 @@ h1 {
     display: flex;
     gap: 12px;
     margin-bottom: 10px;
+    flex-shrink: 0;                 /* added: inputs won't shrink/compress */
 }
 
 input {
