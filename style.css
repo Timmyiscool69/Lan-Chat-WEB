@@ -33,20 +33,20 @@ body {
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
     box-sizing: border-box;
-    overflow: hidden; /* prevents children from stretching container */
+    overflow: hidden; /* hard lock container */
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 28px;
-    flex-shrink: 0;
+    flex: 0 0 auto; /* fixed height */
 }
 
 #chat {
-    flex: 1 1 0;          /* prevents flex-based growth from content */
-    min-height: 0;        /* critical for proper scrolling in flex */
-    max-height: 100%;     /* stops expansion */
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;              /* 🔥 CRITICAL LINE */
     overflow-y: auto;
     overflow-x: hidden;
     background: #0f172a;
@@ -58,7 +58,7 @@ h1 {
     scrollbar-color: #64748b #1e293b;
 }
 
-/* Webkit scrollbar styling */
+/* Scrollbar styling */
 #chat::-webkit-scrollbar {
     width: 8px;
 }
@@ -85,7 +85,6 @@ h1 {
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 85%;
-    flex-shrink: 0; /* prevents flex distortion */
 }
 
 .input-area,
@@ -93,7 +92,7 @@ h1 {
     display: flex;
     gap: 12px;
     margin-bottom: 10px;
-    flex-shrink: 0;
+    flex: 0 0 auto; /* prevent shrinking/growing */
 }
 
 input {
