@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V3 FIX 3.2");
+console.log("Multi-Channel Chat Loaded! V3 FIX 3.3");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -114,7 +114,6 @@ function sendMessage() {
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
         sendMessage();
     }
 });
