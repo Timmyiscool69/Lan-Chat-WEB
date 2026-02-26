@@ -33,19 +33,20 @@ body {
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
     box-sizing: border-box;
-    overflow: hidden; /* hard lock container height */
+    overflow: hidden; /* hard lock container */
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 28px;
-    flex: 0 0 auto; /* fixed height element */
+    flex: 0 0 auto; /* fixed height */
 }
 
 #chat {
-    flex: 1 1 0%;   /* 🔥 critical fix */
-    min-height: 0;  /* 🔥 required for flex scrolling */
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;              /* 🔥 CRITICAL LINE */
     overflow-y: auto;
     overflow-x: hidden;
     background: #0f172a;
@@ -57,7 +58,7 @@ h1 {
     scrollbar-color: #64748b #1e293b;
 }
 
-/* Webkit scrollbar styling */
+/* Scrollbar styling */
 #chat::-webkit-scrollbar {
     width: 8px;
 }
@@ -91,7 +92,7 @@ h1 {
     display: flex;
     gap: 12px;
     margin-bottom: 10px;
-    flex: 0 0 auto; /* prevents flex resizing */
+    flex: 0 0 auto; /* prevent shrinking/growing */
 }
 
 input {
