@@ -1,19 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LanChat Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
-    <div id="loadingScreen" style="display: none;">
-        <div class="loader">Connecting...</div>
+<div id="loadingScreen" style="display: none;">
+    <div class="loader">Connecting...</div>
+</div>
+<div class="chat-container" style="display:none;">
+    <h1>🌎 LanChat Web</h1>
+    <div id="chat"></div>
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type message..." />
+        <button id="sendBtn">Send</button>
     </div>
-    <div class="chat-container">  <!-- remove style="display:none;" if present -->
-        <h1>🌎 LanChat Web</h1>
-        <div id="chat"></div>
-        <div class="input-area">
-            <input type="text" id="messageInput" placeholder="Type message..." />
-            <button id="sendBtn">Send</button>
-        </div>
-        <div class="name-area">
-            <input type="text" id="nameInput" placeholder="Change name" />
-            <button id="nameBtn">Set Name</button>
-        </div>
+    <div class="name-area">
+        <input type="text" id="nameInput" placeholder="Change name" />
+        <button id="nameBtn">Set Name</button>
     </div>
-    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-    <script src="script.js"></script>
+</div>
+<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+<script src="script.js"></script>
 </body>
+</html>
