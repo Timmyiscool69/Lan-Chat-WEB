@@ -25,27 +25,29 @@ body {
 
 .chat-container {
     width: 900px;
-    height: 650px;                  /* kept exactly as is */
+    height: 650px;
     background: #1e293b;
     border-radius: 18px;
     display: flex;
     flex-direction: column;
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-    box-sizing: border-box;         /* added: prevents padding from increasing total size */
+    box-sizing: border-box;
+    overflow: hidden; /* ✅ prevents children from escaping container */
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 28px;
-    flex-shrink: 0;                 /* added: header won't compress */
+    flex-shrink: 0;
 }
 
 #chat {
-    flex: 1 1 auto;               /* stronger flex grow/shrink */
-    min-height: 0;                /* critical: prevents flex child from overflowing parent */
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden; /* ✅ prevents sideways expansion */
     background: #0f172a;
     padding: 20px;
     border-radius: 12px;
@@ -53,23 +55,23 @@ h1 {
     font-size: 18px;
     scrollbar-width: thin;
     scrollbar-color: #64748b #1e293b;
+
+    display: flex;              /* ✅ important */
+    flex-direction: column;     /* ✅ keeps messages stacked */
 }
 
-/* Webkit browsers (Chrome, Edge, Safari) scrollbar styling */
+/* Webkit scrollbar */
 #chat::-webkit-scrollbar {
     width: 8px;
 }
-
 #chat::-webkit-scrollbar-track {
     background: #1e293b;
     border-radius: 10px;
 }
-
 #chat::-webkit-scrollbar-thumb {
     background: #64748b;
     border-radius: 10px;
 }
-
 #chat::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
@@ -79,8 +81,10 @@ h1 {
     padding: 10px 14px;
     background: #334155;
     border-radius: 10px;
-    word-wrap: break-word;          /* added: prevents super long words from breaking layout */
-    max-width: 85%;                 /* added: messages don't stretch full width awkwardly */
+    word-wrap: break-word;
+    overflow-wrap: break-word; /* ✅ stronger word breaking */
+    max-width: 85%;
+    flex-shrink: 0; /* ✅ prevents flex distortion */
 }
 
 .input-area,
@@ -88,7 +92,7 @@ h1 {
     display: flex;
     gap: 12px;
     margin-bottom: 10px;
-    flex-shrink: 0;                 /* added: inputs won't shrink/compress */
+    flex-shrink: 0;
 }
 
 input {
