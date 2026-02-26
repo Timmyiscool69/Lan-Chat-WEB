@@ -5,29 +5,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div id="loadingScreen">
-    <div class="loader">Connecting...</div>
-</div>
-
-<div class="chat-container" style="display:none;">
-    <h1>🌎 LanChat Web</h1>
-
-    <div id="chat"></div>
-
-    <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Type message..." />
-        <button id="sendBtn">Send</button>
+    <!-- Loading screen – visible by default -->
+    <div id="loadingScreen">
+        <div class="loader">Connecting...</div>
     </div>
 
-    <div class="name-area">
-        <input type="text" id="nameInput" placeholder="Change name" />
-        <button id="nameBtn">Set Name</button>
+    <!-- Main chat – start hidden -->
+    <div class="chat-container" style="display: none;">
+        <h1>🌎 LanChat Web</h1>
+        <div id="chat"></div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type message..." />
+            <button id="sendBtn">Send</button>
+        </div>
+        <div class="name-area">
+            <input type="text" id="nameInput" placeholder="Change name" />
+            <button id="nameBtn">Set Name</button>
+        </div>
     </div>
-</div>
 
-<script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
-<script src="script.js"></script>
-
+    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
