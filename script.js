@@ -140,14 +140,18 @@ nameBtn.addEventListener("click", () => {
 // ===== CONNECTION HANDLING =====
 ably.connection.on("connected", () => {
     console.log("Ably connected!");
-    statusEl.textContent = "Connected!";
+    statusEl.textContent = "Connected!";   // ← if you still have statusEl
     statusEl.style.color = "green";
-    // Optional: hide status after a delay
-    setTimeout(() => { if (statusEl) statusEl.style.display = "none"; }, 2000);
 
-    // Now safe to subscribe
+    // NEW: Hide loading screen and show the actual chat
+    document.getElementById("loadingScreen").style.display = "none";
+    document.querySelector(".chat-container").style.display = "block";
+
+    // Optional: brief "Connected!" flash (remove if unwanted)
+    // setTimeout(() => { document.getElementById("loadingScreen").style.display = "none"; }, 1500);
+
     subscribeToChannel();
-    renderChannel(); // show any cached messages
+    renderChannel();
 });
 
 ably.connection.on("failed", (err) => {
