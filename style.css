@@ -33,7 +33,7 @@ body {
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
     box-sizing: border-box;
-    overflow: hidden; /* ✅ prevents children from escaping container */
+    overflow: hidden; /* prevents children from stretching container */
 }
 
 h1 {
@@ -44,10 +44,11 @@ h1 {
 }
 
 #chat {
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 1 1 0;          /* prevents flex-based growth from content */
+    min-height: 0;        /* critical for proper scrolling in flex */
+    max-height: 100%;     /* stops expansion */
     overflow-y: auto;
-    overflow-x: hidden; /* ✅ prevents sideways expansion */
+    overflow-x: hidden;
     background: #0f172a;
     padding: 20px;
     border-radius: 12px;
@@ -55,23 +56,23 @@ h1 {
     font-size: 18px;
     scrollbar-width: thin;
     scrollbar-color: #64748b #1e293b;
-
-    display: flex;              /* ✅ important */
-    flex-direction: column;     /* ✅ keeps messages stacked */
 }
 
-/* Webkit scrollbar */
+/* Webkit scrollbar styling */
 #chat::-webkit-scrollbar {
     width: 8px;
 }
+
 #chat::-webkit-scrollbar-track {
     background: #1e293b;
     border-radius: 10px;
 }
+
 #chat::-webkit-scrollbar-thumb {
     background: #64748b;
     border-radius: 10px;
 }
+
 #chat::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
@@ -82,9 +83,9 @@ h1 {
     background: #334155;
     border-radius: 10px;
     word-wrap: break-word;
-    overflow-wrap: break-word; /* ✅ stronger word breaking */
+    overflow-wrap: break-word;
     max-width: 85%;
-    flex-shrink: 0; /* ✅ prevents flex distortion */
+    flex-shrink: 0; /* prevents flex distortion */
 }
 
 .input-area,
