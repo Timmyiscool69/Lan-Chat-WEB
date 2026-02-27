@@ -44,9 +44,9 @@ h1 {
 }
 
 #chat {
-    flex: 1 1 0;
+    flex: 1 1 auto;   /* allow it to grow */
+    height: 0;        /* keeps it locked from content expansion */
     min-height: 0;
-    height: 0;              /* 🔥 CRITICAL LINE */
     overflow-y: auto;
     overflow-x: hidden;
     background: #0f172a;
@@ -54,8 +54,6 @@ h1 {
     border-radius: 12px;
     margin-bottom: 20px;
     font-size: 18px;
-    scrollbar-width: thin;
-    scrollbar-color: #64748b #1e293b;
 }
 
 /* Scrollbar styling */
