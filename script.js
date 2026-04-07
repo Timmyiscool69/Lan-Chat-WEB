@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 - Beta 5");
+console.log("Multi-Channel Chat Loaded! V4 - Beta 6");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -21,7 +21,7 @@ let systemChannel = null;
 // ===== LOCK SYSTEM =====
 let globalLocked = false;
 let lockedChannels = new Set();
-let lockMessage = "Under maintenance";   // Default message
+let lockMessage = "Under maintenance";
 
 function loadLockState() {
     const savedGlobal = localStorage.getItem('chatGlobalLocked');
@@ -40,7 +40,6 @@ function saveLockState() {
     localStorage.setItem('chatLockMessage', lockMessage);
 }
 
-// Update lock screen with custom message
 function updateLockUI() {
     const lockScreen = document.getElementById("lockScreen");
     const chatContainer = document.getElementById("chatContainer");
@@ -158,11 +157,12 @@ function broadcastCommand(data) {
     if (systemChannel) systemChannel.publish("command", data);
 }
 
+// Command handler
 function handleCommand(cmd) {
     if (cmd === '!cmds') {
         console.log("%c📋 Commands (type directly in console):\n" +
                     "!lock                    → Lock entire chat\n" +
-                    "!lockmessage <text>      → Lock entire chat with custom message\n" +
+                    "!lockmessage <text>      → Lock with custom message\n" +
                     "!unlock                  → Unlock entire chat\n" +
                     "!lockchannel private-1   → Lock specific channel\n" +
                     "!unlockchannel private-1 → Unlock specific channel\n" +
@@ -187,7 +187,7 @@ function handleCommand(cmd) {
             saveLockState();
             broadcastCommand({type: 'globalLock', message: lockMessage});
             updateLockUI();
-            console.log(`🔒 Entire chat locked with message: "${customMsg}"`);
+            console.log(`🔒 Chat locked with message: "${customMsg}"`);
         }
     } 
     else if (cmd === '!unlock') {
@@ -255,7 +255,7 @@ function sendMessage() {
     if (channel) channel.publish("message", msg);
 }
 
-// Event listeners
+// ==================== EVENT LISTENERS ====================
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
@@ -270,17 +270,23 @@ nameBtn.addEventListener("click", () => {
     }
 });
 
-// Direct console commands support (!cmds, !lock, !lockmessage, etc.)
-window.addEventListener('load', () => {
-    const originalLog = console.log;
-    console.log = function(...args) {
-        if (typeof args[0] === 'string' && args[0].startsWith('!')) {
-            handleCommand(args[0]);
-        } else {
-            originalLog.apply(console, args);
-        }
-    };
-});
+// ==================== DIRECT CONSOLE COMMANDS FIX ====================
+// This is the fix for "!cmds is not defined"
+const originalConsoleLog = console.log;
+console.log = function(...args) {
+    if (typeof args[0] === 'string' && args[0].startsWith('!')) {
+        handleCommand(args[0]);
+    } else {
+        originalConsoleLog.apply(console, args);
+    }
+};
+
+// Backup command function
+window.chatCommand = function(cmd) {
+    if (cmd && typeof cmd === "string" && cmd.startsWith('!')) {
+        handleCommand(cmd);
+    }
+};
 
 // Connection
 ably.connection.on("connected", () => {
@@ -295,11 +301,11 @@ ably.connection.on("connected", () => {
     updateLockUI();
     requestNotificationPermission();
 
-    console.log("%c✅ Type !cmds in console to see all commands", "color:#3b82f6; font-weight:bold");
+    console.log("%c✅ Ready! Just type !cmds in the console", "color:#3b82f6; font-weight:bold");
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
 
-// Initial setup
+// Initial
 loadLockState();
 document.getElementById("loadingScreen").style.display = "flex";
