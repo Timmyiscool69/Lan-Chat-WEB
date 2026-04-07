@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 - Beta 6");
+console.log("Multi-Channel Chat Loaded! V4 BETA 7;
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -62,11 +62,10 @@ function updateChannelButtons() {
         btn.classList.remove('active', 'locked');
 
         if (globalLocked || lockedChannels.has(ch)) {
-            btn.classList.add('locked');        // Grey
+            btn.classList.add('locked');
         } else if (ch === currentChannelName) {
-            btn.classList.add('active');        // Bright blue
+            btn.classList.add('active');
         }
-        // Else: dark blue
     });
 }
 
@@ -160,13 +159,13 @@ function broadcastCommand(data) {
 // Command handler
 function handleCommand(cmd) {
     if (cmd === '!cmds') {
-        console.log("%c📋 Commands (type directly in console):\n" +
-                    "!lock                    → Lock entire chat\n" +
-                    "!lockmessage <text>      → Lock with custom message\n" +
-                    "!unlock                  → Unlock entire chat\n" +
-                    "!lockchannel private-1   → Lock specific channel\n" +
-                    "!unlockchannel private-1 → Unlock specific channel\n" +
-                    "!cmds                    → Show this list",
+        console.log("%c📋 Commands - Type like this in console:\n\n" +
+                    "!('cmds')                    → Show this list\n" +
+                    "!('lock')                    → Lock entire chat\n" +
+                    "!('lockmessage Your message here') → Lock with custom message\n" +
+                    "!('unlock')                  → Unlock entire chat\n" +
+                    "!('lockchannel private-1')   → Lock specific channel\n" +
+                    "!('unlockchannel private-1') → Unlock specific channel",
                     "color:#3b82f6; font-family:monospace");
         return;
     }
@@ -220,6 +219,30 @@ function handleCommand(cmd) {
     }
 }
 
+// ==================== THE !() FUNCTION YOU WANTED ====================
+function !(cmd) {
+    if (typeof cmd === "string" && cmd.startsWith('!')) {
+        handleCommand(cmd);
+    } else {
+        console.log("%c❌ Usage example: !('cmds')", "color:#ef4444");
+    }
+}
+
+// Event listeners
+sendBtn.addEventListener("click", sendMessage);
+messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
+
+nameBtn.addEventListener("click", () => {
+    const newName = nameInput.value.trim();
+    if (newName) {
+        username = newName;
+        localStorage.setItem("username", username);
+        alert("Name changed to " + username);
+    }
+});
+
 function switchChannel(newChannel) {
     if (globalLocked) return;
     if (newChannel === currentChannelName) return;
@@ -255,39 +278,6 @@ function sendMessage() {
     if (channel) channel.publish("message", msg);
 }
 
-// ==================== EVENT LISTENERS ====================
-sendBtn.addEventListener("click", sendMessage);
-messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
-
-nameBtn.addEventListener("click", () => {
-    const newName = nameInput.value.trim();
-    if (newName) {
-        username = newName;
-        localStorage.setItem("username", username);
-        alert("Name changed to " + username);
-    }
-});
-
-// ==================== DIRECT CONSOLE COMMANDS FIX ====================
-// This is the fix for "!cmds is not defined"
-const originalConsoleLog = console.log;
-console.log = function(...args) {
-    if (typeof args[0] === 'string' && args[0].startsWith('!')) {
-        handleCommand(args[0]);
-    } else {
-        originalConsoleLog.apply(console, args);
-    }
-};
-
-// Backup command function
-window.chatCommand = function(cmd) {
-    if (cmd && typeof cmd === "string" && cmd.startsWith('!')) {
-        handleCommand(cmd);
-    }
-};
-
 // Connection
 ably.connection.on("connected", () => {
     console.log("Ably connected!");
@@ -301,7 +291,7 @@ ably.connection.on("connected", () => {
     updateLockUI();
     requestNotificationPermission();
 
-    console.log("%c✅ Ready! Just type !cmds in the console", "color:#3b82f6; font-weight:bold");
+    console.log("%c✅ Use !('cmds') in console to see commands", "color:#3b82f6; font-weight:bold");
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
