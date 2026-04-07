@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 BETA 9");
+console.log("Multi-Channel Chat Loaded! V4 - Beta 4");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -159,13 +159,13 @@ function broadcastCommand(data) {
 // Command handler
 function handleCommand(cmd) {
     if (cmd === '!cmds') {
-        console.log("%c📋 Commands - Use in console like this:\n\n" +
-                    " !('cmds')                    → Show this list\n" +
-                    " !('lock')                    → Lock entire chat\n" +
-                    " !('lockmessage Your message') → Lock with custom message\n" +
-                    " !('unlock')                  → Unlock entire chat\n" +
-                    " !('lockchannel private-1')   → Lock specific channel\n" +
-                    " !('unlockchannel private-1') → Unlock specific channel",
+        console.log("%c📋 Commands - Type in console:\n\n" +
+                    " cmd('!cmds')                    → Show this list\n" +
+                    " cmd('!lock')                    → Lock entire chat\n" +
+                    " cmd('!lockmessage Your message') → Lock with custom message\n" +
+                    " cmd('!unlock')                  → Unlock entire chat\n" +
+                    " cmd('!lockchannel private-1')   → Lock specific channel\n" +
+                    " cmd('!unlockchannel private-1') → Unlock specific channel",
                     "color:#3b82f6; font-family:monospace");
         return;
     }
@@ -219,13 +219,13 @@ function handleCommand(cmd) {
     }
 }
 
-// ==================== THE !() FUNCTION ====================
-window['!'] = function(cmd) {
-    if (typeof cmd === "string" && cmd.startsWith('!')) {
-        handleCommand(cmd);
-        return;                    // Prevents showing "undefined" or "false"
+// ==================== CMD FUNCTION - NO MORE FALSE ====================
+window.cmd = function(input) {
+    if (typeof input === "string" && input.startsWith('!')) {
+        handleCommand(input);
+        return;   // Prevents returning anything
     }
-    console.log("%c❌ Usage: !('cmds')", "color:#ef4444");
+    console.log("%c❌ Usage: cmd('!cmds')", "color:#ef4444");
 };
 
 // Event listeners
@@ -291,11 +291,11 @@ ably.connection.on("connected", () => {
     updateLockUI();
     requestNotificationPermission();
 
-    console.log("%c✅ Ready! Type !('cmds') in the console", "color:#3b82f6; font-weight:bold");
+    console.log("%c✅ Type:   cmd('!cmds')   in the console", "color:#3b82f6; font-weight:bold");
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
 
-// Initial setup
+// Initial
 loadLockState();
 document.getElementById("loadingScreen").style.display = "flex";
