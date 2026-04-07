@@ -11,6 +11,12 @@
     <!-- Loading Screen -->
     <div id="loadingScreen">Connecting to Lan-Chat...</div>
 
+    <!-- Lock Screen -->
+    <div id="lockScreen">
+        <h2>Entire chat locked</h2>
+        <p>Under maintenance</p>
+    </div>
+
     <!-- Chat Container -->
     <div class="chat-container" id="chatContainer">
         <div id="chat"></div>
@@ -28,7 +34,7 @@
         </div>
     </div>
 
-    <!-- Channels (with data-channel for JS highlighting + locked state) -->
+    <!-- Channels -->
     <div id="channels">
         <button data-channel="public-chat" onclick="switchChannel('public-chat')">Public</button>
         <button data-channel="private-1" onclick="switchChannel('private-1')">Private 1</button>
