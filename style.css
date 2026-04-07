@@ -85,8 +85,8 @@ body {
 }
 
 #channels button:hover:not(.locked) {
-    background: #475569;
-    border-color: #3b82f6;
+    background: #3b82f6;
+    border-color: #334155;
 }
 
 /* Bright blue = currently selected */
