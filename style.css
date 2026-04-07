@@ -66,13 +66,13 @@ body {
     padding: 15px;
     display: flex;
     gap: 10px;
-    border-bottom: 1px solid #334155;
+    border-bottom: 1px solid #144b99;
     overflow-x: auto;
     flex-shrink: 0;
 }
 
 #channels button {
-    background: #334155;           /* Dark blue = unlocked + not selected */
+    background: #144b99;           /* Dark blue = unlocked + not selected */
     border: 2px solid transparent;
     padding: 10px 20px;
     border-radius: 8px;
