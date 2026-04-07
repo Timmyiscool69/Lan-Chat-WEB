@@ -55,10 +55,11 @@ body {
 #lockScreen p {
     font-size: 18px;
     color: #94a3b8;
-    max-width: 400px;
+    max-width: 500px;
+    padding: 0 20px;
 }
 
-/* Channels - Final Color Scheme */
+/* ==================== CHANNELS - Fixed Colors ==================== */
 #channels {
     width: 100%;
     background: #1e293b;
@@ -71,7 +72,7 @@ body {
 }
 
 #channels button {
-    background: #334155;           /* Dark blue = not selected + unlocked */
+    background: #334155;           /* Dark blue = unlocked + not selected */
     border: 2px solid transparent;
     padding: 10px 20px;
     border-radius: 8px;
@@ -95,12 +96,12 @@ body {
     font-weight: 600;
 }
 
-/* Grey = specific channel locked OR entire chat locked */
+/* Grey = locked (specific channel or entire chat) */
 #channels button.locked {
     background: #64748b;
     color: #cbd5e1;
     cursor: not-allowed;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 #channels button.locked:hover {
