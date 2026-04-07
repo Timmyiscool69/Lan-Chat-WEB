@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 FIX 1");
+console.log("Multi-Channel Chat Loaded! V4 FIX 2");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -15,7 +15,7 @@ localStorage.setItem("username", username);
 const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
 
 let currentChannelName = "public-chat";
-let channel = null;  // Start null, set after connect
+let channel = null;
 
 // ===== CHANNEL LOG STORAGE =====
 let channelLogs = {
@@ -31,8 +31,30 @@ const nameInput = document.getElementById("nameInput");
 const sendBtn = document.getElementById("sendBtn");
 const nameBtn = document.getElementById("nameBtn");
 
-// Fallback status element (won't show unless you add <div id="status"> in HTML)
-const statusEl = document.getElementById("status") || document.createElement("div");
+// Request notification permission once
+function requestNotificationPermission() {
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
+// Show system notification for new messages (only if tab is not active)
+function showSystemNotification(messageText) {
+    if (document.visibilityState === "visible") return; // Don't notify if user is already viewing
+
+    if ("Notification" in window && Notification.permission === "granted") {
+        const notification = new Notification("New Message", {
+            body: messageText.length > 60 ? messageText.substring(0, 57) + "..." : messageText,
+            icon: "", // You can add an icon URL here if you want
+            tag: "chat-message" // prevents duplicate notifications
+        });
+
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+    }
+}
 
 // ===== DISPLAY NAME =====
 function getDisplayName() {
@@ -54,19 +76,22 @@ function renderChannel() {
 // ===== SUBSCRIBE =====
 function subscribeToChannel() {
     if (channel) channel.unsubscribe();
+
     channel = ably.channels.get(currentChannelName);
     channel.subscribe("message", (msg) => {
         const messageText = msg.data;
-        // Removed includes() check → allows duplicate/repeated messages
         channelLogs[currentChannelName].push(messageText);
         renderChannel();
+        showSystemNotification(messageText);   // ← System notification
     });
+
     console.log(`Subscribed to ${currentChannelName}`);
 }
 
 // ===== SWITCH CHANNEL =====
 function switchChannel(newChannel) {
     if (newChannel === currentChannelName) return;
+
     if (channelPasswords[newChannel]) {
         const entered = prompt("Enter password for this channel:");
         if (entered !== channelPasswords[newChannel]) {
@@ -74,10 +99,11 @@ function switchChannel(newChannel) {
             return;
         }
     }
+
     currentChannelName = newChannel;
     subscribeToChannel();
     renderChannel();
-    alert("Switched to: " + newChannel);
+    // Optional: highlight active button (you can improve this later)
 }
 
 // ===== SEND MESSAGE =====
@@ -88,10 +114,12 @@ function sendMessage() {
     }
     const text = messageInput.value.trim();
     if (!text) return;
+
     const msg = `${getDisplayName()}: ${text}`;
     messageInput.value = "";
     messageInput.focus();
-    channel.publish("message", msg);  // No .then/.catch – old Ably version doesn't support it
+
+    channel.publish("message", msg);
 }
 
 // ===== EVENT LISTENERS =====
@@ -100,7 +128,6 @@ messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
-// ===== CHANGE NAME =====
 nameBtn.addEventListener("click", () => {
     const newName = nameInput.value.trim();
     if (!newName) return;
@@ -109,30 +136,20 @@ nameBtn.addEventListener("click", () => {
     alert("Name changed to " + username);
 });
 
-// ===== CONNECTION HANDLING – THIS FIXES THE LOADING SCREEN =====
-ably.connection.on("connecting", () => {
-    statusEl.textContent = "Connecting...";
-});
-
+// ===== CONNECTION HANDLING =====
 ably.connection.on("connected", () => {
     console.log("Ably connected!");
-    // Hide loader, show chat
     document.getElementById("loadingScreen").style.display = "none";
-    document.querySelector(".chat-container").style.display = "block";  // or "flex" if your CSS needs it
+
+    // Auto join public-chat on start
     subscribeToChannel();
-    renderChannel();  // Show any cached messages (though usually empty at start)
+    renderChannel();
+    requestNotificationPermission();
 });
 
 ably.connection.on("failed", (err) => {
     console.error("Connection failed:", err);
-    statusEl.textContent = "Connection failed – check console";
-    // Optional: keep loader or show error in UI
-});
-
-ably.connection.on("disconnected", () => {
-    console.log("Disconnected");
-    // Optional: show loader again or status
 });
 
 // Initial state
-statusEl.textContent = "Connecting...";
+document.getElementById("loadingScreen").style.display = "flex";
