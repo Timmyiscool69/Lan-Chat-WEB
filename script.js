@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 BETA 8");
+console.log("Multi-Channel Chat Loaded! V4 BETA 9");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -159,7 +159,7 @@ function broadcastCommand(data) {
 // Command handler
 function handleCommand(cmd) {
     if (cmd === '!cmds') {
-        console.log("%c📋 Commands - Type in console like this:\n\n" +
+        console.log("%c📋 Commands - Use in console like this:\n\n" +
                     " !('cmds')                    → Show this list\n" +
                     " !('lock')                    → Lock entire chat\n" +
                     " !('lockmessage Your message') → Lock with custom message\n" +
@@ -219,13 +219,13 @@ function handleCommand(cmd) {
     }
 }
 
-// ==================== THE ! FUNCTION YOU WANTED ====================
+// ==================== THE !() FUNCTION ====================
 window['!'] = function(cmd) {
     if (typeof cmd === "string" && cmd.startsWith('!')) {
         handleCommand(cmd);
-    } else {
-        console.log("%c❌ Usage: !('cmds')   or   !('lock')", "color:#ef4444");
+        return;                    // Prevents showing "undefined" or "false"
     }
+    console.log("%c❌ Usage: !('cmds')", "color:#ef4444");
 };
 
 // Event listeners
@@ -291,7 +291,7 @@ ably.connection.on("connected", () => {
     updateLockUI();
     requestNotificationPermission();
 
-    console.log("%c✅ Type !('cmds') in the console to see all commands", "color:#3b82f6; font-weight:bold");
+    console.log("%c✅ Ready! Type !('cmds') in the console", "color:#3b82f6; font-weight:bold");
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
