@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 Beta 2");
+console.log("Multi-Channel Chat Loaded! V4 Beta 3");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -154,21 +154,21 @@ function broadcastCommand(data) {
 
 // Command handler (console only)
 function handleCommand(cmd) {
-    if (cmd === '!lockm') {
+    if (cmd === 'lockm') {
         globalLocked = true;
         saveLockState();
         broadcastCommand({type: 'globalLock'});
         updateLockUI();
         console.log("🔒 Entire chat locked (maintenance)");
     } 
-    else if (cmd === '!unlockm' && globalLocked) {
+    else if (cmd === 'unlock' && globalLocked) {
         globalLocked = false;
         saveLockState();
         broadcastCommand({type: 'globalUnlock'});
         updateLockUI();
         console.log("🔓 Entire chat unlocked");
     } 
-    else if (cmd.startsWith('!lockchannel ')) {
+    else if (cmd.startsWith('lockchannel ')) {
         const ch = cmd.split(' ')[1];
         if (ch) {
             lockedChannels.add(ch);
@@ -179,7 +179,7 @@ function handleCommand(cmd) {
             console.log(`🔒 Channel ${ch} locked`);
         }
     } 
-    else if (cmd.startsWith('!unlockchannel ')) {
+    else if (cmd.startsWith('unlockchannel ')) {
         const ch = cmd.split(' ')[1];
         if (ch) {
             lockedChannels.delete(ch);
@@ -189,7 +189,7 @@ function handleCommand(cmd) {
             console.log(`🔓 Channel ${ch} unlocked`);
         }
     } 
-    else if (cmd === '!cmds') {
+    else if (cmd === 'cmds') {
         console.log("%c📋 Commands (use in console):\n" +
                     "chatCommand('!lockm')               → Lock entire chat\n" +
                     "chatCommand('!unlockm')             → Unlock entire chat\n" +
