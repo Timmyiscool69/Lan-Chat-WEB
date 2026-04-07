@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 BETA 7");
+console.log("Multi-Channel Chat Loaded! V4 BETA 8");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -159,13 +159,13 @@ function broadcastCommand(data) {
 // Command handler
 function handleCommand(cmd) {
     if (cmd === '!cmds') {
-        console.log("%c📋 Commands - Type like this in console:\n\n" +
-                    "!('cmds')                    → Show this list\n" +
-                    "!('lock')                    → Lock entire chat\n" +
-                    "!('lockmessage Your message here') → Lock with custom message\n" +
-                    "!('unlock')                  → Unlock entire chat\n" +
-                    "!('lockchannel private-1')   → Lock specific channel\n" +
-                    "!('unlockchannel private-1') → Unlock specific channel",
+        console.log("%c📋 Commands - Type in console like this:\n\n" +
+                    " !('cmds')                    → Show this list\n" +
+                    " !('lock')                    → Lock entire chat\n" +
+                    " !('lockmessage Your message') → Lock with custom message\n" +
+                    " !('unlock')                  → Unlock entire chat\n" +
+                    " !('lockchannel private-1')   → Lock specific channel\n" +
+                    " !('unlockchannel private-1') → Unlock specific channel",
                     "color:#3b82f6; font-family:monospace");
         return;
     }
@@ -219,14 +219,14 @@ function handleCommand(cmd) {
     }
 }
 
-// ==================== THE !() FUNCTION YOU WANTED ====================
-function !(cmd) {
+// ==================== THE ! FUNCTION YOU WANTED ====================
+window['!'] = function(cmd) {
     if (typeof cmd === "string" && cmd.startsWith('!')) {
         handleCommand(cmd);
     } else {
-        console.log("%c❌ Usage example: !('cmds')", "color:#ef4444");
+        console.log("%c❌ Usage: !('cmds')   or   !('lock')", "color:#ef4444");
     }
-}
+};
 
 // Event listeners
 sendBtn.addEventListener("click", sendMessage);
@@ -291,11 +291,11 @@ ably.connection.on("connected", () => {
     updateLockUI();
     requestNotificationPermission();
 
-    console.log("%c✅ Use !('cmds') in console to see commands", "color:#3b82f6; font-weight:bold");
+    console.log("%c✅ Type !('cmds') in the console to see all commands", "color:#3b82f6; font-weight:bold");
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
 
-// Initial
+// Initial setup
 loadLockState();
 document.getElementById("loadingScreen").style.display = "flex";
