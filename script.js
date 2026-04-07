@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 Beta 3");
+console.log("Multi-Channel Chat Loaded! V4 Beta 4");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -152,23 +152,23 @@ function broadcastCommand(data) {
     if (systemChannel) systemChannel.publish("command", data);
 }
 
-// Command handler (console only)
+// Command handler
 function handleCommand(cmd) {
-    if (cmd === 'lockm') {
+    if (cmd === '!lockm') {
         globalLocked = true;
         saveLockState();
         broadcastCommand({type: 'globalLock'});
         updateLockUI();
         console.log("🔒 Entire chat locked (maintenance)");
     } 
-    else if (cmd === 'unlock' && globalLocked) {
+    else if (cmd === '!unlockm' && globalLocked) {
         globalLocked = false;
         saveLockState();
         broadcastCommand({type: 'globalUnlock'});
         updateLockUI();
         console.log("🔓 Entire chat unlocked");
     } 
-    else if (cmd.startsWith('lockchannel ')) {
+    else if (cmd.startsWith('!lockchannel ')) {
         const ch = cmd.split(' ')[1];
         if (ch) {
             lockedChannels.add(ch);
@@ -179,7 +179,7 @@ function handleCommand(cmd) {
             console.log(`🔒 Channel ${ch} locked`);
         }
     } 
-    else if (cmd.startsWith('unlockchannel ')) {
+    else if (cmd.startsWith('!unlockchannel ')) {
         const ch = cmd.split(' ')[1];
         if (ch) {
             lockedChannels.delete(ch);
@@ -189,14 +189,14 @@ function handleCommand(cmd) {
             console.log(`🔓 Channel ${ch} unlocked`);
         }
     } 
-    else if (cmd === 'cmds') {
-        console.log("%c📋 Commands (use in console):\n" +
-                    "chatCommand('!lockm')               → Lock entire chat\n" +
-                    "chatCommand('!unlockm')             → Unlock entire chat\n" +
-                    "chatCommand('!lockchannel private-1') → Lock specific channel\n" +
-                    "chatCommand('!unlockchannel private-1') → Unlock specific channel\n" +
-                    "chatCommand('!cmds')                → Show this list",
-                    "color:#3b82f6; font-family:monospace");
+    else if (cmd === '!cmds') {
+        console.log("%c📋 Available Commands (type exactly like this in console):\n\n" +
+                    "chatCommand('!lockm')                  → Lock entire chat\n" +
+                    "chatCommand('!unlockm')                → Unlock entire chat\n" +
+                    "chatCommand('!lockchannel private-1')  → Lock specific channel\n" +
+                    "chatCommand('!unlockchannel private-1')→ Unlock specific channel\n" +
+                    "chatCommand('!cmds')                   → Show this list again",
+                    "color:#3b82f6; font-family:monospace; font-size:13px");
     }
 }
 
@@ -250,15 +250,20 @@ nameBtn.addEventListener("click", () => {
     }
 });
 
+// Console command - THIS FIXES THE ERROR
 window.chatCommand = function(command) {
-    if (typeof command === "string" && command.startsWith('!')) {
+    if (!command || typeof command !== "string") {
+        console.log("%c❌ Please use: chatCommand('!cmds')", "color:#ef4444");
+        return;
+    }
+    if (command.startsWith('!')) {
         handleCommand(command);
     } else {
-        console.log("%c❌ Use: chatCommand('!cmds')", "color:#ef4444");
+        console.log("%c❌ Commands must start with !   Example: chatCommand('!cmds')", "color:#ef4444");
     }
 };
 
-// Connection handling
+// Connection
 ably.connection.on("connected", () => {
     console.log("Ably connected!");
     document.getElementById("loadingScreen").style.display = "none";
@@ -271,7 +276,7 @@ ably.connection.on("connected", () => {
     updateLockUI();
     requestNotificationPermission();
 
-    console.log("%c✅ Type chatCommand('!cmds') in console (F12)", "color:#3b82f6");
+    console.log("%c✅ Chat ready! Type this in console:   chatCommand('!cmds')", "color:#3b82f6; font-weight:bold");
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
