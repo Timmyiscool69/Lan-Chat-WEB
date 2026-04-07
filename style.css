@@ -27,7 +27,7 @@ body {
     z-index: 9999;
 }
 
-/* Channels */
+/* ==================== CHANNELS ==================== */
 #channels {
     width: 100%;
     background: #1e293b;
@@ -40,29 +40,45 @@ body {
 }
 
 #channels button {
-    background: #334155;
+    background: #334155;           /* dark blue = not selected */
     border: 2px solid transparent;
-    padding: 10px 18px;
+    padding: 10px 20px;
     border-radius: 8px;
     color: white;
-    font-size: 14px;
+    font-size: 14.5px;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
     font-weight: 500;
 }
 
-#channels button:hover {
+#channels button:hover:not(.locked) {
     background: #475569;
     border-color: #3b82f6;
 }
 
+/* Active (selected) = bright blue */
 #channels button.active {
     background: #3b82f6;
     border-color: #1e40af;
+    font-weight: 600;
 }
 
-/* Chat Area */
+/* Locked = grey */
+#channels button.locked {
+    background: #64748b;
+    color: #cbd5e1;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+#channels button.locked:hover {
+    background: #64748b;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ==================== CHAT AREA ==================== */
 .chat-container {
     flex: 1;
     display: flex;
@@ -97,7 +113,7 @@ body {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Input Areas */
+/* ==================== INPUTS & BUTTONS (bigger as requested) ==================== */
 .name-area,
 .input-area {
     display: flex;
@@ -105,16 +121,15 @@ body {
     align-items: center;
 }
 
-/* Bigger textboxes + modern style */
 input {
     flex: 1;
-    padding: 10px 14px;      /* Bigger padding */
-    height: 42px;            /* Bigger height */
+    padding: 10px 14px;
+    height: 42px;
     border-radius: 8px;
     border: 1px solid #334155;
     background: #1e293b;
     color: white;
-    font-size: 15px;         /* Bigger font */
+    font-size: 15px;
     transition: all 0.3s ease;
 }
 
@@ -129,15 +144,14 @@ input::placeholder {
     color: #94a3b8;
 }
 
-/* Bigger modern buttons */
 button {
     background: #3b82f6;
     border: none;
     padding: 0 24px;
-    height: 42px;            /* Same height as inputs */
+    height: 42px;
     border-radius: 8px;
     color: white;
-    font-size: 15px;         /* Bigger font */
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -158,19 +172,10 @@ button:active {
 
 /* Responsive */
 @media (max-width: 768px) {
-    input, button {
-        height: 40px;
-        font-size: 14.5px;
-    }
+    input, button { height: 40px; font-size: 14.5px; }
 }
 
 @media (max-width: 480px) {
-    .chat-container {
-        padding: 12px;
-        gap: 12px;
-    }
-    input, button {
-        height: 38px;
-        font-size: 14px;
-    }
+    .chat-container { padding: 12px; gap: 12px; }
+    input, button { height: 38px; font-size: 14px; }
 }
