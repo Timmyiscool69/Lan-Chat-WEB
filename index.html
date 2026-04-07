@@ -8,6 +8,10 @@
 </head>
 <body>
 
+    <!-- Loading Screen -->
+    <div id="loadingScreen">Connecting to Lan-Chat...</div>
+
+    <!-- Chat Container -->
     <div class="chat-container" id="chatContainer">
         <div id="chat"></div>
 
@@ -24,11 +28,11 @@
         </div>
     </div>
 
-    <!-- Channels -->
+    <!-- Channels (with data-channel for JS highlighting + locked state) -->
     <div id="channels">
-        <button onclick="switchChannel('public-chat')">Public</button>
-        <button onclick="switchChannel('private-1')">Private 1</button>
-        <button onclick="switchChannel('private-2')">Private 2</button>
+        <button data-channel="public-chat" onclick="switchChannel('public-chat')">Public</button>
+        <button data-channel="private-1" onclick="switchChannel('private-1')">Private 1</button>
+        <button data-channel="private-2" onclick="switchChannel('private-2')">Private 2</button>
     </div>
 
     <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
