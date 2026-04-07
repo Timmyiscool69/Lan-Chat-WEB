@@ -172,7 +172,7 @@ function handleCommand(cmd) {
 
     if (cmd === '!lock') {
         globalLocked = true;
-        lockMessage = "Under maintenance";
+        lockMessage = " ";
         saveLockState();
         broadcastCommand({type: 'globalLock', message: lockMessage});
         updateLockUI();
