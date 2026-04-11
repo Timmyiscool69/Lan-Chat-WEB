@@ -59,20 +59,20 @@ body {
     padding: 0 20px;
 }
 
-/* ==================== CHANNELS - Fixed Colors ==================== */
+/* ==================== CHANNELS ==================== */
 #channels {
     width: 100%;
     background: #1e293b;
     padding: 15px;
     display: flex;
     gap: 10px;
-    border-bottom: 1px solid #144b99;
+    border-bottom: 1px solid #334155;
     overflow-x: auto;
     flex-shrink: 0;
 }
 
 #channels button {
-    background: #144b99;           /* Dark blue = unlocked + not selected */
+    background: #334155;           /* Dark blue = unlocked + not selected */
     border: 2px solid transparent;
     padding: 10px 20px;
     border-radius: 8px;
@@ -85,8 +85,8 @@ body {
 }
 
 #channels button:hover:not(.locked) {
-    background: #3b82f6;
-    border-color: #334155;
+    background: #475569;
+    border-color: #3b82f6;
 }
 
 /* Bright blue = currently selected */
@@ -96,12 +96,13 @@ body {
     font-weight: 600;
 }
 
-/* Grey = locked (specific channel or entire chat) */
+/* Grey = locked (specific or global) - NO underline */
 #channels button.locked {
     background: #64748b;
     color: #cbd5e1;
     cursor: not-allowed;
     opacity: 0.9;
+    text-decoration: none;           /* Removed underline */
 }
 
 #channels button.locked:hover {
@@ -109,7 +110,7 @@ body {
     transform: none;
 }
 
-/* Chat Area */
+/* ==================== CHAT AREA ==================== */
 .chat-container {
     flex: 1;
     display: flex;
@@ -144,7 +145,7 @@ body {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Bigger modern inputs & buttons */
+/* ==================== INPUTS & BUTTONS ==================== */
 .name-area,
 .input-area {
     display: flex;
