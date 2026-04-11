@@ -1,4 +1,4 @@
-console.log("Multi-Channel Chat Loaded! V4 - Beta 4");
+console.log("Multi-Channel Chat Loaded! V4");
 
 // ===== PASSWORDS =====
 const channelPasswords = {
@@ -18,28 +18,44 @@ let currentChannelName = "public-chat";
 let channel = null;
 let systemChannel = null;
 
-// ===== LOCK SYSTEM =====
+// ===== PERSISTENT LOCK STATE =====
 let globalLocked = false;
 let lockedChannels = new Set();
 let lockMessage = "Under maintenance";
 
-function loadLockState() {
-    const savedGlobal = localStorage.getItem('chatGlobalLocked');
-    if (savedGlobal !== null) globalLocked = savedGlobal === 'true';
+const LOCK_KEY = "globalChatLockState";
 
-    const savedLocked = localStorage.getItem('chatLockedChannels');
-    if (savedLocked) lockedChannels = new Set(JSON.parse(savedLocked));
-
-    const savedMessage = localStorage.getItem('chatLockMessage');
-    if (savedMessage) lockMessage = savedMessage;
+async function savePersistentLock() {
+    try {
+        const state = {
+            globalLocked: globalLocked,
+            lockedChannels: Array.from(lockedChannels),
+            lockMessage: lockMessage,
+            timestamp: Date.now()
+        };
+        await systemChannel.history.push({ name: "lockState", data: state });
+    } catch (e) {
+        console.warn("Failed to save persistent lock", e);
+    }
 }
 
-function saveLockState() {
-    localStorage.setItem('chatGlobalLocked', globalLocked);
-    localStorage.setItem('chatLockedChannels', JSON.stringify([...lockedChannels]));
-    localStorage.setItem('chatLockMessage', lockMessage);
+async function loadPersistentLock() {
+    try {
+        const history = await systemChannel.history.get({ limit: 1, direction: "backward" });
+        if (history.items.length > 0) {
+            const latest = history.items[0].data;
+            if (latest && typeof latest === "object") {
+                globalLocked = !!latest.globalLocked;
+                lockedChannels = new Set(latest.lockedChannels || []);
+                if (latest.lockMessage) lockMessage = latest.lockMessage;
+            }
+        }
+    } catch (e) {
+        console.warn("No previous lock state found");
+    }
 }
 
+// Update UI
 function updateLockUI() {
     const lockScreen = document.getElementById("lockScreen");
     const chatContainer = document.getElementById("chatContainer");
@@ -128,53 +144,50 @@ function subscribeToChannel() {
 
 function subscribeToSystem() {
     systemChannel = ably.channels.get("system");
-    systemChannel.subscribe("command", (msg) => {
+
+    // Listen for lock updates from others
+    systemChannel.subscribe("lockUpdate", (msg) => {
         const data = msg.data;
-        if (data.type === 'globalLock') {
-            globalLocked = true;
-            if (data.message) lockMessage = data.message;
-            saveLockState();
-            updateLockUI();
-        } else if (data.type === 'globalUnlock') {
-            globalLocked = false;
-            saveLockState();
-            updateLockUI();
-        } else if (data.type === 'lockChannel') {
-            lockedChannels.add(data.channel);
-            saveLockState();
-            updateChannelButtons();
-            if (currentChannelName === data.channel && !globalLocked) switchChannel("public-chat");
-        } else if (data.type === 'unlockChannel') {
-            lockedChannels.delete(data.channel);
-            saveLockState();
-            updateChannelButtons();
-        }
+        globalLocked = data.globalLocked;
+        lockedChannels = new Set(data.lockedChannels || []);
+        if (data.lockMessage) lockMessage = data.lockMessage;
+        saveLockState();
+        updateLockUI();
+    });
+
+    // Load latest persistent state on join
+    loadPersistentLock().then(() => {
+        updateLockUI();
     });
 }
 
-function broadcastCommand(data) {
-    if (systemChannel) systemChannel.publish("command", data);
+function broadcastLockUpdate() {
+    const data = {
+        globalLocked: globalLocked,
+        lockedChannels: Array.from(lockedChannels),
+        lockMessage: lockMessage
+    };
+    systemChannel.publish("lockUpdate", data);
+    savePersistentLock();
 }
 
-// Command handler
 function handleCommand(cmd) {
     if (cmd === '!cmds') {
-        console.log("%c📋 Commands - Type in console:\n\n" +
-                    " cmd('!cmds')                    → Show this list\n" +
-                    " cmd('!lock')                    → Lock entire chat\n" +
-                    " cmd('!lockmessage Your message') → Lock with custom message\n" +
-                    " cmd('!unlock')                  → Unlock entire chat\n" +
-                    " cmd('!lockchannel private-1')   → Lock specific channel\n" +
-                    " cmd('!unlockchannel private-1') → Unlock specific channel",
+        console.log("%c📋 Commands:\n" +
+                    "cmd('!cmds')                    → Show this list\n" +
+                    "cmd('!lock')                    → Lock entire chat\n" +
+                    "cmd('!lockmessage Your text')   → Lock with custom message\n" +
+                    "cmd('!unlock')                  → Unlock entire chat\n" +
+                    "cmd('!lockchannel private-1')   → Lock specific channel\n" +
+                    "cmd('!unlockchannel private-1') → Unlock specific channel",
                     "color:#3b82f6; font-family:monospace");
         return;
     }
 
     if (cmd === '!lock') {
         globalLocked = true;
-        lockMessage = " ";
-        saveLockState();
-        broadcastCommand({type: 'globalLock', message: lockMessage});
+        lockMessage = "Under maintenance";
+        broadcastLockUpdate();
         updateLockUI();
         console.log("🔒 Entire chat locked");
     } 
@@ -183,16 +196,14 @@ function handleCommand(cmd) {
         if (customMsg) {
             globalLocked = true;
             lockMessage = customMsg;
-            saveLockState();
-            broadcastCommand({type: 'globalLock', message: lockMessage});
+            broadcastLockUpdate();
             updateLockUI();
             console.log(`🔒 Chat locked with message: "${customMsg}"`);
         }
     } 
     else if (cmd === '!unlock') {
         globalLocked = false;
-        saveLockState();
-        broadcastCommand({type: 'globalUnlock'});
+        broadcastLockUpdate();
         updateLockUI();
         console.log("🔓 Entire chat unlocked");
     } 
@@ -200,8 +211,7 @@ function handleCommand(cmd) {
         const ch = cmd.split(' ')[1];
         if (ch) {
             lockedChannels.add(ch);
-            saveLockState();
-            broadcastCommand({type: 'lockChannel', channel: ch});
+            broadcastLockUpdate();
             updateChannelButtons();
             if (currentChannelName === ch) switchChannel("public-chat");
             console.log(`🔒 Channel ${ch} locked`);
@@ -211,24 +221,23 @@ function handleCommand(cmd) {
         const ch = cmd.split(' ')[1];
         if (ch) {
             lockedChannels.delete(ch);
-            saveLockState();
-            broadcastCommand({type: 'unlockChannel', channel: ch});
+            broadcastLockUpdate();
             updateChannelButtons();
             console.log(`🔓 Channel ${ch} unlocked`);
         }
     }
 }
 
-// ==================== CMD FUNCTION - NO MORE FALSE ====================
+// ==================== CMD FUNCTION ====================
 window.cmd = function(input) {
     if (typeof input === "string" && input.startsWith('!')) {
         handleCommand(input);
-        return;   // Prevents returning anything
+        return;
     }
     console.log("%c❌ Usage: cmd('!cmds')", "color:#ef4444");
 };
 
-// Event listeners
+// Event listeners (unchanged)
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
@@ -290,8 +299,6 @@ ably.connection.on("connected", () => {
     updateChannelButtons();
     updateLockUI();
     requestNotificationPermission();
-
-    console.log("%c✅ Type:   cmd('!cmds')   in the console", "color:#3b82f6; font-weight:bold");
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
