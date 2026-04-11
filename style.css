@@ -14,6 +14,7 @@ body {
     overflow: hidden;
 }
 
+/* Loading Screen */
 #loadingScreen {
     position: fixed;
     top: 0; left: 0;
@@ -59,24 +60,24 @@ body {
     padding: 0 20px;
 }
 
-/* ==================== CHANNELS - Strong Mobile Fix ==================== */
+/* ==================== CHANNELS - Mobile Friendly ==================== */
 #channels {
     width: 100%;
     background: #1e293b;
-    padding: 10px 12px;
+    padding: 12px 10px;
     display: flex;
-    flex-wrap: wrap;           /* Force wrapping */
+    flex-wrap: wrap;
     gap: 8px;
     border-bottom: 1px solid #334155;
     overflow-x: auto;
     flex-shrink: 0;
-    min-height: 58px;          /* Ensure space */
+    padding-bottom: max(12px, env(safe-area-inset-bottom)); /* Handles navigation bar */
 }
 
 #channels button {
     background: #2e599e;
     border: 2px solid transparent;
-    padding: 10px 18px;
+    padding: 10px 16px;
     border-radius: 8px;
     color: white;
     font-size: 14px;
@@ -84,8 +85,7 @@ body {
     transition: all 0.3s ease;
     white-space: nowrap;
     font-weight: 500;
-    flex: 1 1 auto;            /* Allow buttons to grow */
-    min-width: 85px;           /* Better for phones */
+    min-width: 80px;
     text-align: center;
 }
 
@@ -94,14 +94,12 @@ body {
     border-color: #60a5fa;
 }
 
-/* Bright blue = selected */
 #channels button.active {
     background: #3b82f6;
     border-color: #1e40af;
     font-weight: 600;
 }
 
-/* Locked buttons - no hover, no outline */
 #channels button.locked {
     background: #64748b;
     color: #cbd5e1;
@@ -124,6 +122,7 @@ body {
     padding: 15px;
     gap: 12px;
     overflow: hidden;
+    padding-bottom: max(15px, env(safe-area-inset-bottom)); /* Important for navigation bar */
 }
 
 #chat {
@@ -136,7 +135,6 @@ body {
     border: 1px solid #334155;
 }
 
-/* Messages */
 .message {
     margin-bottom: 12px;
     padding: 12px 16px;
@@ -193,12 +191,11 @@ button {
     #channels button {
         padding: 9px 14px;
         font-size: 13.5px;
-        min-width: 78px;
+        min-width: 75px;
     }
     
     .chat-container {
-        padding: 12px;
-        gap: 10px;
+        padding: 12px 10px;
     }
 }
 
