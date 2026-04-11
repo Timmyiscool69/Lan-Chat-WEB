@@ -59,31 +59,34 @@ body {
     padding: 0 20px;
 }
 
-/* ==================== CHANNELS - Improved for Mobile ==================== */
+/* ==================== CHANNELS - Strong Mobile Fix ==================== */
 #channels {
     width: 100%;
     background: #1e293b;
-    padding: 12px 15px;
+    padding: 10px 12px;
     display: flex;
-    flex-wrap: wrap;               /* Allows wrapping on small screens */
-    gap: 10px;
+    flex-wrap: wrap;           /* Force wrapping */
+    gap: 8px;
     border-bottom: 1px solid #334155;
     overflow-x: auto;
     flex-shrink: 0;
+    min-height: 58px;          /* Ensure space */
 }
 
 #channels button {
-    background: #2e599e;           /* Your requested dark blue */
+    background: #2e599e;
     border: 2px solid transparent;
-    padding: 10px 20px;
+    padding: 10px 18px;
     border-radius: 8px;
     color: white;
-    font-size: 14.5px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
     font-weight: 500;
-    min-width: 100px;              /* Better touch target on mobile */
+    flex: 1 1 auto;            /* Allow buttons to grow */
+    min-width: 85px;           /* Better for phones */
+    text-align: center;
 }
 
 #channels button:hover:not(.locked) {
@@ -91,14 +94,14 @@ body {
     border-color: #60a5fa;
 }
 
-/* Bright blue = currently selected */
+/* Bright blue = selected */
 #channels button.active {
     background: #3b82f6;
     border-color: #1e40af;
     font-weight: 600;
 }
 
-/* Grey locked buttons - NO hover effect, NO border */
+/* Locked buttons - no hover, no outline */
 #channels button.locked {
     background: #64748b;
     color: #cbd5e1;
@@ -106,14 +109,11 @@ body {
     opacity: 0.9;
     text-decoration: none;
     border: 2px solid transparent;
-    box-shadow: none;
 }
 
 #channels button.locked:hover {
     background: #64748b;
-    border-color: transparent;
     transform: none;
-    box-shadow: none;
 }
 
 /* ==================== CHAT AREA ==================== */
@@ -121,8 +121,8 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    gap: 15px;
+    padding: 15px;
+    gap: 12px;
     overflow: hidden;
 }
 
@@ -130,12 +130,13 @@ body {
     flex: 1;
     overflow-y: auto;
     background: #0f172a;
-    padding: 20px;
+    padding: 15px;
     border-radius: 12px;
     font-size: 16px;
     border: 1px solid #334155;
 }
 
+/* Messages */
 .message {
     margin-bottom: 12px;
     padding: 12px 16px;
@@ -143,108 +144,73 @@ body {
     border-radius: 8px;
     word-wrap: break-word;
     line-height: 1.4;
-    animation: slideIn 0.2s ease;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ==================== INPUTS & BUTTONS ==================== */
+/* Inputs & Buttons */
 .name-area,
 .input-area {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
 }
 
 input {
     flex: 1;
-    padding: 10px 14px;
+    padding: 10px 12px;
     height: 42px;
     border-radius: 8px;
     border: 1px solid #334155;
     background: #1e293b;
     color: white;
     font-size: 15px;
-    transition: all 0.3s ease;
 }
 
 input:focus {
     outline: none;
     border-color: #3b82f6;
-    background: #0f172a;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-input::placeholder {
-    color: #94a3b8;
 }
 
 button {
     background: #3b82f6;
     border: none;
-    padding: 0 24px;
+    padding: 0 20px;
     height: 42px;
     border-radius: 8px;
     color: white;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
 }
 
-button:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45);
-}
-
-button:active {
-    transform: translateY(0);
-}
-
-/* ==================== MOBILE RESPONSIVE ==================== */
+/* ==================== MOBILE IMPROVEMENTS ==================== */
 @media (max-width: 768px) {
     #channels {
-        padding: 12px;
-        gap: 8px;
+        padding: 10px 8px;
+        gap: 6px;
     }
     
     #channels button {
-        padding: 9px 16px;
-        font-size: 14px;
-        min-width: 90px;
+        padding: 9px 14px;
+        font-size: 13.5px;
+        min-width: 78px;
     }
     
-    input, button {
-        height: 40px;
-        font-size: 14.5px;
+    .chat-container {
+        padding: 12px;
+        gap: 10px;
     }
 }
 
 @media (max-width: 480px) {
-    .chat-container {
-        padding: 12px;
-        gap: 12px;
-    }
-    
     #channels button {
-        padding: 8px 14px;
+        padding: 8px 12px;
         font-size: 13px;
-        min-width: 80px;
+        min-width: 70px;
     }
     
     input, button {
-        height: 38px;
+        height: 40px;
         font-size: 14px;
-    }
-    
-    h1 {
-        font-size: 22px;
     }
 }
