@@ -83,6 +83,7 @@ body {
     transition: all 0.3s ease;
     white-space: nowrap;
     font-weight: 500;
+    flex: 1 1 30%;
     min-width: 100px;              /* Better touch target on mobile */
 }
 
