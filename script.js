@@ -1,6 +1,6 @@
-console.log("Multi-Channel Chat Loaded! V4 Beta 2");
+console.log("Multi-Channel Chat Loaded! V4 Beta Finish");
 
-
+// ==================== SENSITIVE CONFIG ====================
 const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";
 
 const channelPasswords = {
@@ -200,7 +200,13 @@ window.cmd = function(input) {
     console.log("%c❌ Usage: cmd('!cmds')", "color:#ef4444");
 };
 
-// Notifications
+// ==================== NOTIFICATIONS ====================
+function requestNotificationPermission() {
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
 function showSystemNotification(messageText) {
     if (document.visibilityState === "visible") return;
     if ("Notification" in window && Notification.permission === "granted") {
@@ -253,7 +259,7 @@ messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
-// Allow pressing Enter in name input
+// Name change with Enter key
 nameInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         changeName();
@@ -272,7 +278,7 @@ function changeName() {
     }
 }
 
-// Connection
+// ==================== CONNECTION ====================
 ably.connection.on("connected", () => {
     console.log("Ably connected!");
     document.getElementById("loadingScreen").style.display = "none";
@@ -283,12 +289,12 @@ ably.connection.on("connected", () => {
     renderChannel();
     updateChannelButtons();
     updateLockUI();
-    requestNotificationPermission();
+    requestNotificationPermission();   // Now properly defined
 
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
 
-// Initial
+// Initial setup
 loadLockState();
 document.getElementById("loadingScreen").style.display = "flex";
