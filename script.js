@@ -1,6 +1,6 @@
-console.log("Multi-Channel Chat Loaded! V4 attempt finish 3");
+console.log("Multi-Channel Chat Loaded! V4 Revert 2");
 
-
+// ==================== SENSITIVE CONFIG ====================
 const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";
 
 const channelPasswords = {
@@ -9,7 +9,8 @@ const channelPasswords = {
 };
 
 // ==================== VARIABLES ====================
-let username = localStorage.getItem("username") || "Guest" + Math.floor(Math.random() * 1000);
+let username = localStorage.getItem("username") ||
+               "Guest" + Math.floor(Math.random() * 1000);
 localStorage.setItem("username", username);
 
 let currentChannelName = "public-chat";
@@ -31,42 +32,24 @@ const sendBtn = document.getElementById("sendBtn");
 const nameInput = document.getElementById("nameInput");
 const nameBtn = document.getElementById("nameBtn");
 
-// ==================== SERVER PERSISTENT LOCK ====================
-async function saveLockToServer() {
-    if (!systemChannel) return;
-    const state = {
-        globalLocked: globalLocked,
-        lockedChannels: Array.from(lockedChannels),
-        lockMessage: lockMessage,
-        timestamp: Date.now()
-    };
-    try {
-        await systemChannel.publish("lockUpdate", state);
-    } catch (e) {
-        console.warn("Failed to save lock", e);
-    }
+// ==================== LOCK FUNCTIONS ====================
+function loadLockState() {
+    const savedGlobal = localStorage.getItem('chatGlobalLocked');
+    if (savedGlobal !== null) globalLocked = savedGlobal === 'true';
+
+    const savedLocked = localStorage.getItem('chatLockedChannels');
+    if (savedLocked) lockedChannels = new Set(JSON.parse(savedLocked));
+
+    const savedMessage = localStorage.getItem('chatLockMessage');
+    if (savedMessage) lockMessage = savedMessage;
 }
 
-async function loadLockFromServer() {
-    if (!systemChannel) return false;
-    try {
-        const history = await systemChannel.history.get({ limit: 1, direction: "backward" });
-        if (history.items.length > 0) {
-            const latest = history.items[0].data;
-            if (latest && typeof latest === "object") {
-                globalLocked = !!latest.globalLocked;
-                lockedChannels = new Set(latest.lockedChannels || []);
-                if (latest.lockMessage) lockMessage = latest.lockMessage;
-                return true;
-            }
-        }
-    } catch (e) {
-        console.warn("No previous lock state found");
-    }
-    return false;
+function saveLockState() {
+    localStorage.setItem('chatGlobalLocked', globalLocked);
+    localStorage.setItem('chatLockedChannels', JSON.stringify([...lockedChannels]));
+    localStorage.setItem('chatLockMessage', lockMessage);
 }
 
-// Update UI
 function updateLockUI() {
     const lockScreen = document.getElementById("lockScreen");
     const chatContainer = document.getElementById("chatContainer");
@@ -122,9 +105,10 @@ function subscribeToChannel() {
     if (channel) channel.unsubscribe();
     channel = ably.channels.get(currentChannelName);
     channel.subscribe("message", (msg) => {
-        channelLogs[currentChannelName].push(msg.data);
+        const messageText = msg.data;
+        channelLogs[currentChannelName].push(messageText);
         renderChannel();
-        showSystemNotification(msg.data);
+        showSystemNotification(messageText);
     });
 }
 
@@ -136,19 +120,19 @@ function subscribeToSystem() {
         globalLocked = data.globalLocked;
         lockedChannels = new Set(data.lockedChannels || []);
         if (data.lockMessage) lockMessage = data.lockMessage;
+        saveLockState();
         updateLockUI();
     });
 }
 
 function broadcastLockUpdate() {
-    if (!systemChannel) return;
     const data = {
         globalLocked: globalLocked,
         lockedChannels: Array.from(lockedChannels),
         lockMessage: lockMessage
     };
     systemChannel.publish("lockUpdate", data);
-    saveLockToServer();
+    saveLockState();
 }
 
 function handleCommand(cmd) {
@@ -216,7 +200,13 @@ window.cmd = function(input) {
     console.log("%c❌ Usage: cmd('!cmds')", "color:#ef4444");
 };
 
-// Notifications
+// ==================== NOTIFICATIONS ====================
+function requestNotificationPermission() {
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
 function showSystemNotification(messageText) {
     if (document.visibilityState === "visible") return;
     if ("Notification" in window && Notification.permission === "granted") {
@@ -227,7 +217,7 @@ function showSystemNotification(messageText) {
     }
 }
 
-// Send & Switch
+// ==================== SEND & SWITCH ====================
 function sendMessage() {
     if (globalLocked || lockedChannels.has(currentChannelName)) return;
 
@@ -263,14 +253,17 @@ function switchChannel(newChannel) {
     updateChannelButtons();
 }
 
-// Event listeners
+// ==================== EVENT LISTENERS ====================
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
+// Name change with Enter key
 nameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") changeName();
+    if (e.key === "Enter") {
+        changeName();
+    }
 });
 
 nameBtn.addEventListener("click", changeName);
@@ -285,21 +278,23 @@ function changeName() {
     }
 }
 
-// Connection
-ably.connection.on("connected", async () => {
+// ==================== CONNECTION ====================
+ably.connection.on("connected", () => {
     console.log("Ably connected!");
     document.getElementById("loadingScreen").style.display = "none";
 
+    loadLockState();
     subscribeToChannel();
     subscribeToSystem();
-    await loadLockFromServer();   // ← This is the key fix
     renderChannel();
     updateChannelButtons();
     updateLockUI();
+    requestNotificationPermission();   // Now properly defined
 
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
 
-// Initial
+// Initial setup
+loadLockState();
 document.getElementById("loadingScreen").style.display = "flex";
