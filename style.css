@@ -59,12 +59,13 @@ body {
     padding: 0 20px;
 }
 
-/* ==================== CHANNELS ==================== */
+/* ==================== CHANNELS - Improved for Mobile ==================== */
 #channels {
     width: 100%;
     background: #1e293b;
-    padding: 15px;
+    padding: 12px 15px;
     display: flex;
+    flex-wrap: wrap;               /* Allows wrapping on small screens */
     gap: 10px;
     border-bottom: 1px solid #334155;
     overflow-x: auto;
@@ -72,7 +73,7 @@ body {
 }
 
 #channels button {
-    background: #16169c;           /* Deep blue - close to rgb(22, 22, 156) */
+    background: #2e599e;           /* Your requested dark blue */
     border: 2px solid transparent;
     padding: 10px 20px;
     border-radius: 8px;
@@ -82,11 +83,12 @@ body {
     transition: all 0.3s ease;
     white-space: nowrap;
     font-weight: 500;
+    min-width: 100px;              /* Better touch target on mobile */
 }
 
 #channels button:hover:not(.locked) {
-    background: #2020b3;
-    border-color: #3b82f6;
+    background: #3b6eb8;
+    border-color: #60a5fa;
 }
 
 /* Bright blue = currently selected */
@@ -96,18 +98,22 @@ body {
     font-weight: 600;
 }
 
-/* Grey = locked channels - NO underline */
+/* Grey locked buttons - NO hover effect, NO border */
 #channels button.locked {
     background: #64748b;
     color: #cbd5e1;
     cursor: not-allowed;
     opacity: 0.9;
-    text-decoration: none;           /* Explicitly remove underline */
+    text-decoration: none;
+    border: 2px solid transparent;
+    box-shadow: none;
 }
 
 #channels button.locked:hover {
     background: #64748b;
+    border-color: transparent;
     transform: none;
+    box-shadow: none;
 }
 
 /* ==================== CHAT AREA ==================== */
@@ -202,12 +208,43 @@ button:active {
     transform: translateY(0);
 }
 
-/* Responsive */
+/* ==================== MOBILE RESPONSIVE ==================== */
 @media (max-width: 768px) {
-    input, button { height: 40px; font-size: 14.5px; }
+    #channels {
+        padding: 12px;
+        gap: 8px;
+    }
+    
+    #channels button {
+        padding: 9px 16px;
+        font-size: 14px;
+        min-width: 90px;
+    }
+    
+    input, button {
+        height: 40px;
+        font-size: 14.5px;
+    }
 }
 
 @media (max-width: 480px) {
-    .chat-container { padding: 12px; gap: 12px; }
-    input, button { height: 38px; font-size: 14px; }
+    .chat-container {
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    #channels button {
+        padding: 8px 14px;
+        font-size: 13px;
+        min-width: 80px;
+    }
+    
+    input, button {
+        height: 38px;
+        font-size: 14px;
+    }
+    
+    h1 {
+        font-size: 22px;
+    }
 }
