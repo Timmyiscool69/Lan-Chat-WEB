@@ -59,33 +59,31 @@ body {
     padding: 0 20px;
 }
 
-/* ==================== CHANNELS ==================== */
+/* ==================== CHANNELS - Improved for Mobile ==================== */
 #channels {
     width: 100%;
     background: #1e293b;
-    padding: 12px 10px;
+    padding: 12px 15px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-wrap: wrap;               /* Allows wrapping on small screens */
+    gap: 10px;
     border-bottom: 1px solid #334155;
     overflow-x: auto;
     flex-shrink: 0;
 }
 
 #channels button {
-    background: #2e599e;
+    background: #2e599e;           /* Your requested dark blue */
     border: 2px solid transparent;
-    padding: 10px 16px;
+    padding: 10px 20px;
     border-radius: 8px;
     color: white;
-    font-size: 14px;
+    font-size: 14.5px;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
     font-weight: 500;
-    flex: 1 1 30%;           /* ~1/3 width */
-    min-width: 80px;
-    text-align: center;
+    min-width: 100px;              /* Better touch target on mobile */
 }
 
 #channels button:hover:not(.locked) {
@@ -93,12 +91,14 @@ body {
     border-color: #60a5fa;
 }
 
+/* Bright blue = currently selected */
 #channels button.active {
     background: #3b82f6;
     border-color: #1e40af;
     font-weight: 600;
 }
 
+/* Grey locked buttons - NO hover effect, NO border */
 #channels button.locked {
     background: #64748b;
     color: #cbd5e1;
@@ -106,11 +106,14 @@ body {
     opacity: 0.9;
     text-decoration: none;
     border: 2px solid transparent;
+    box-shadow: none;
 }
 
 #channels button.locked:hover {
     background: #64748b;
+    border-color: transparent;
     transform: none;
+    box-shadow: none;
 }
 
 /* ==================== CHAT AREA ==================== */
@@ -118,7 +121,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 15px;
+    padding: 20px;
     gap: 15px;
     overflow: hidden;
 }
@@ -127,7 +130,7 @@ body {
     flex: 1;
     overflow-y: auto;
     background: #0f172a;
-    padding: 15px;
+    padding: 20px;
     border-radius: 12px;
     font-size: 16px;
     border: 1px solid #334155;
@@ -140,9 +143,15 @@ body {
     border-radius: 8px;
     word-wrap: break-word;
     line-height: 1.4;
+    animation: slideIn 0.2s ease;
 }
 
-/* Inputs & Buttons */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== INPUTS & BUTTONS ==================== */
 .name-area,
 .input-area {
     display: flex;
@@ -159,6 +168,7 @@ input {
     background: #1e293b;
     color: white;
     font-size: 15px;
+    transition: all 0.3s ease;
 }
 
 input:focus {
@@ -194,31 +204,47 @@ button:hover {
     box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45);
 }
 
-/* ==================== MOBILE - Much more bottom space ==================== */
+button:active {
+    transform: translateY(0);
+}
+
+/* ==================== MOBILE RESPONSIVE ==================== */
 @media (max-width: 768px) {
     #channels {
-        padding: 12px 10px 40px 10px;     /* Much more padding */
+        padding: 12px;
+        gap: 8px;
     }
-    .chat-container {
-        padding: 12px 10px 20px 10px;
+    
+    #channels button {
+        padding: 9px 16px;
+        font-size: 14px;
+        min-width: 90px;
+    }
+    
+    input, button {
+        height: 40px;
+        font-size: 14.5px;
     }
 }
 
 @media (max-width: 480px) {
-    #channels {
-        padding: 10px 8px 50px 8px;       /* Even more on small phones */
-    }
-    #channels button {
-        padding: 9px 12px;
-        font-size: 13px;
-        flex: 1 1 30%;
-        min-width: 70px;
-    }
     .chat-container {
-        padding-bottom: 30px;
+        padding: 12px;
+        gap: 12px;
     }
+    
+    #channels button {
+        padding: 8px 14px;
+        font-size: 13px;
+        min-width: 80px;
+    }
+    
     input, button {
-        height: 40px;
+        height: 38px;
         font-size: 14px;
+    }
+    
+    h1 {
+        font-size: 22px;
     }
 }
