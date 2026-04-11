@@ -72,7 +72,7 @@ body {
 }
 
 #channels button {
-    background: #334155;           /* Dark blue = unlocked + not selected */
+    background: #16169c;           /* Deep blue - close to rgb(22, 22, 156) */
     border: 2px solid transparent;
     padding: 10px 20px;
     border-radius: 8px;
@@ -85,7 +85,7 @@ body {
 }
 
 #channels button:hover:not(.locked) {
-    background: #475569;
+    background: #2020b3;
     border-color: #3b82f6;
 }
 
@@ -96,13 +96,13 @@ body {
     font-weight: 600;
 }
 
-/* Grey = locked (specific or global) - NO underline */
+/* Grey = locked channels - NO underline */
 #channels button.locked {
     background: #64748b;
     color: #cbd5e1;
     cursor: not-allowed;
     opacity: 0.9;
-    text-decoration: none;           /* Removed underline */
+    text-decoration: none;           /* Explicitly remove underline */
 }
 
 #channels button.locked:hover {
