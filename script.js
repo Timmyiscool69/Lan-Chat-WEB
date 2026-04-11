@@ -1,6 +1,8 @@
-console.log("Multi-Channel Chat Loaded! V4 Beta Finish");
+console.log("Multi-Channel Chat Loaded! V4 Final Beta 2");
 
-// ==================== SENSITIVE CONFIG ====================
+
+
+
 const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";
 
 const channelPasswords = {
@@ -32,7 +34,7 @@ const sendBtn = document.getElementById("sendBtn");
 const nameInput = document.getElementById("nameInput");
 const nameBtn = document.getElementById("nameBtn");
 
-// ==================== LOCK FUNCTIONS ====================
+// ==================== PERSISTENT LOCK ====================
 function loadLockState() {
     const savedGlobal = localStorage.getItem('chatGlobalLocked');
     if (savedGlobal !== null) globalLocked = savedGlobal === 'true';
@@ -115,6 +117,7 @@ function subscribeToChannel() {
 function subscribeToSystem() {
     systemChannel = ably.channels.get("system");
 
+    // Load latest lock state when connecting
     systemChannel.subscribe("lockUpdate", (msg) => {
         const data = msg.data;
         globalLocked = data.globalLocked;
@@ -200,13 +203,7 @@ window.cmd = function(input) {
     console.log("%c❌ Usage: cmd('!cmds')", "color:#ef4444");
 };
 
-// ==================== NOTIFICATIONS ====================
-function requestNotificationPermission() {
-    if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-    }
-}
-
+// Notifications
 function showSystemNotification(messageText) {
     if (document.visibilityState === "visible") return;
     if ("Notification" in window && Notification.permission === "granted") {
@@ -217,7 +214,7 @@ function showSystemNotification(messageText) {
     }
 }
 
-// ==================== SEND & SWITCH ====================
+// Send & Switch
 function sendMessage() {
     if (globalLocked || lockedChannels.has(currentChannelName)) return;
 
@@ -253,17 +250,14 @@ function switchChannel(newChannel) {
     updateChannelButtons();
 }
 
-// ==================== EVENT LISTENERS ====================
+// Event listeners
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
 });
 
-// Name change with Enter key
 nameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        changeName();
-    }
+    if (e.key === "Enter") changeName();
 });
 
 nameBtn.addEventListener("click", changeName);
@@ -278,7 +272,7 @@ function changeName() {
     }
 }
 
-// ==================== CONNECTION ====================
+// Connection
 ably.connection.on("connected", () => {
     console.log("Ably connected!");
     document.getElementById("loadingScreen").style.display = "none";
@@ -289,12 +283,11 @@ ably.connection.on("connected", () => {
     renderChannel();
     updateChannelButtons();
     updateLockUI();
-    requestNotificationPermission();   // Now properly defined
 
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
 
-// Initial setup
+// Initial
 loadLockState();
 document.getElementById("loadingScreen").style.display = "flex";
