@@ -1,58 +1,41 @@
-console.log("Multi-Channel Chat Loaded! V4");
+console.log("Multi-Channel Chat Loaded! V4 Beta 1");
 
-// ===== PASSWORDS =====
+
+const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";   // ← Put your real key here
+
 const channelPasswords = {
     "private-1": "smart456",
     "private-2": "yeah200"
 };
 
-// ===== USERNAME =====
-let username = localStorage.getItem("username") ||
-               "Guest" + Math.floor(Math.random() * 1000);
-localStorage.setItem("username", username);
 
-// ===== ABLY =====
-const ably = new Ably.Realtime("75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg");
+
+const ably = new Ably.Realtime(ABLY_API_KEY);
 
 let currentChannelName = "public-chat";
 let channel = null;
 let systemChannel = null;
 
-// ===== PERSISTENT LOCK STATE =====
+// ===== LOCK STATE =====
 let globalLocked = false;
 let lockedChannels = new Set();
 let lockMessage = "Under maintenance";
 
-const LOCK_KEY = "globalChatLockState";
+function loadLockState() {
+    const savedGlobal = localStorage.getItem('chatGlobalLocked');
+    if (savedGlobal !== null) globalLocked = savedGlobal === 'true';
 
-async function savePersistentLock() {
-    try {
-        const state = {
-            globalLocked: globalLocked,
-            lockedChannels: Array.from(lockedChannels),
-            lockMessage: lockMessage,
-            timestamp: Date.now()
-        };
-        await systemChannel.history.push({ name: "lockState", data: state });
-    } catch (e) {
-        console.warn("Failed to save persistent lock", e);
-    }
+    const savedLocked = localStorage.getItem('chatLockedChannels');
+    if (savedLocked) lockedChannels = new Set(JSON.parse(savedLocked));
+
+    const savedMessage = localStorage.getItem('chatLockMessage');
+    if (savedMessage) lockMessage = savedMessage;
 }
 
-async function loadPersistentLock() {
-    try {
-        const history = await systemChannel.history.get({ limit: 1, direction: "backward" });
-        if (history.items.length > 0) {
-            const latest = history.items[0].data;
-            if (latest && typeof latest === "object") {
-                globalLocked = !!latest.globalLocked;
-                lockedChannels = new Set(latest.lockedChannels || []);
-                if (latest.lockMessage) lockMessage = latest.lockMessage;
-            }
-        }
-    } catch (e) {
-        console.warn("No previous lock state found");
-    }
+function saveLockState() {
+    localStorage.setItem('chatGlobalLocked', globalLocked);
+    localStorage.setItem('chatLockedChannels', JSON.stringify([...lockedChannels]));
+    localStorage.setItem('chatLockMessage', lockMessage);
 }
 
 // Update UI
@@ -145,18 +128,12 @@ function subscribeToChannel() {
 function subscribeToSystem() {
     systemChannel = ably.channels.get("system");
 
-    // Listen for lock updates from others
     systemChannel.subscribe("lockUpdate", (msg) => {
         const data = msg.data;
         globalLocked = data.globalLocked;
         lockedChannels = new Set(data.lockedChannels || []);
         if (data.lockMessage) lockMessage = data.lockMessage;
         saveLockState();
-        updateLockUI();
-    });
-
-    // Load latest persistent state on join
-    loadPersistentLock().then(() => {
         updateLockUI();
     });
 }
@@ -168,7 +145,7 @@ function broadcastLockUpdate() {
         lockMessage: lockMessage
     };
     systemChannel.publish("lockUpdate", data);
-    savePersistentLock();
+    saveLockState();
 }
 
 function handleCommand(cmd) {
@@ -228,7 +205,6 @@ function handleCommand(cmd) {
     }
 }
 
-// ==================== CMD FUNCTION ====================
 window.cmd = function(input) {
     if (typeof input === "string" && input.startsWith('!')) {
         handleCommand(input);
@@ -237,7 +213,7 @@ window.cmd = function(input) {
     console.log("%c❌ Usage: cmd('!cmds')", "color:#ef4444");
 };
 
-// Event listeners (unchanged)
+// Event listeners
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
@@ -299,6 +275,7 @@ ably.connection.on("connected", () => {
     updateChannelButtons();
     updateLockUI();
     requestNotificationPermission();
+
 });
 
 ably.connection.on("failed", (err) => console.error("Connection failed:", err));
