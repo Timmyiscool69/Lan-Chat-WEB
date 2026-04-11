@@ -1,6 +1,6 @@
-console.log("Multi-Channel Chat Loaded! V4 Attempting final 2");
+console.log("Multi-Channel Chat Loaded! V4 attempt finish 3");
 
-// ==================== SENSITIVE CONFIG ====================
+
 const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";
 
 const channelPasswords = {
@@ -16,7 +16,7 @@ let currentChannelName = "public-chat";
 let channel = null;
 let systemChannel = null;
 
-// Lock state (server-side only)
+// Lock state
 let globalLocked = false;
 let lockedChannels = new Set();
 let lockMessage = " ";
@@ -41,14 +41,14 @@ async function saveLockToServer() {
         timestamp: Date.now()
     };
     try {
-        await systemChannel.publish("lockState", state);
+        await systemChannel.publish("lockUpdate", state);
     } catch (e) {
-        console.warn("Failed to save lock to server", e);
+        console.warn("Failed to save lock", e);
     }
 }
 
 async function loadLockFromServer() {
-    if (!systemChannel) return;
+    if (!systemChannel) return false;
     try {
         const history = await systemChannel.history.get({ limit: 1, direction: "backward" });
         if (history.items.length > 0) {
@@ -57,11 +57,13 @@ async function loadLockFromServer() {
                 globalLocked = !!latest.globalLocked;
                 lockedChannels = new Set(latest.lockedChannels || []);
                 if (latest.lockMessage) lockMessage = latest.lockMessage;
+                return true;
             }
         }
     } catch (e) {
-        console.warn("No previous lock state found on server");
+        console.warn("No previous lock state found");
     }
+    return false;
 }
 
 // Update UI
@@ -129,17 +131,11 @@ function subscribeToChannel() {
 function subscribeToSystem() {
     systemChannel = ably.channels.get("system");
 
-    // Listen for lock updates
     systemChannel.subscribe("lockUpdate", (msg) => {
         const data = msg.data;
         globalLocked = data.globalLocked;
         lockedChannels = new Set(data.lockedChannels || []);
         if (data.lockMessage) lockMessage = data.lockMessage;
-        updateLockUI();
-    });
-
-    // Load latest lock state when connecting
-    loadLockFromServer().then(() => {
         updateLockUI();
     });
 }
@@ -290,12 +286,13 @@ function changeName() {
 }
 
 // Connection
-ably.connection.on("connected", () => {
+ably.connection.on("connected", async () => {
     console.log("Ably connected!");
     document.getElementById("loadingScreen").style.display = "none";
 
     subscribeToChannel();
     subscribeToSystem();
+    await loadLockFromServer();   // ← This is the key fix
     renderChannel();
     updateChannelButtons();
     updateLockUI();
