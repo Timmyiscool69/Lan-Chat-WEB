@@ -1,26 +1,38 @@
-console.log("Multi-Channel Chat Loaded! V4 Beta 1");
+console.log("Multi-Channel Chat Loaded! V4 Beta 2");
 
 
-const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";   // ← Put your real key here
+const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";
 
 const channelPasswords = {
     "private-1": "smart456",
     "private-2": "yeah200"
 };
 
-
-
-const ably = new Ably.Realtime(ABLY_API_KEY);
+// ==================== VARIABLES ====================
+let username = localStorage.getItem("username") ||
+               "Guest" + Math.floor(Math.random() * 1000);
+localStorage.setItem("username", username);
 
 let currentChannelName = "public-chat";
 let channel = null;
 let systemChannel = null;
 
-// ===== LOCK STATE =====
+// Lock state
 let globalLocked = false;
 let lockedChannels = new Set();
-let lockMessage = "Under maintenance";
+let lockMessage = " ";
 
+// Ably
+const ably = new Ably.Realtime(ABLY_API_KEY);
+
+// DOM
+const chat = document.getElementById("chat");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const nameInput = document.getElementById("nameInput");
+const nameBtn = document.getElementById("nameBtn");
+
+// ==================== LOCK FUNCTIONS ====================
 function loadLockState() {
     const savedGlobal = localStorage.getItem('chatGlobalLocked');
     if (savedGlobal !== null) globalLocked = savedGlobal === 'true';
@@ -38,7 +50,6 @@ function saveLockState() {
     localStorage.setItem('chatLockMessage', lockMessage);
 }
 
-// Update UI
 function updateLockUI() {
     const lockScreen = document.getElementById("lockScreen");
     const chatContainer = document.getElementById("chatContainer");
@@ -68,36 +79,12 @@ function updateChannelButtons() {
     });
 }
 
-// ===== CHANNEL LOGS =====
+// ==================== CHAT FUNCTIONS ====================
 let channelLogs = {
     "public-chat": [],
     "private-1": [],
     "private-2": []
 };
-
-// DOM
-const chat = document.getElementById("chat");
-const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const nameInput = document.getElementById("nameInput");
-const nameBtn = document.getElementById("nameBtn");
-
-// Notifications
-function requestNotificationPermission() {
-    if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-    }
-}
-
-function showSystemNotification(messageText) {
-    if (document.visibilityState === "visible") return;
-    if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("New Message", {
-            body: messageText.length > 60 ? messageText.substring(0, 57) + "..." : messageText,
-            tag: "chat-message"
-        });
-    }
-}
 
 function getDisplayName() {
     return "WEB | " + username;
@@ -163,7 +150,7 @@ function handleCommand(cmd) {
 
     if (cmd === '!lock') {
         globalLocked = true;
-        lockMessage = "Under maintenance";
+        lockMessage = " ";
         broadcastLockUpdate();
         updateLockUI();
         console.log("🔒 Entire chat locked");
@@ -213,20 +200,30 @@ window.cmd = function(input) {
     console.log("%c❌ Usage: cmd('!cmds')", "color:#ef4444");
 };
 
-// Event listeners
-sendBtn.addEventListener("click", sendMessage);
-messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
-
-nameBtn.addEventListener("click", () => {
-    const newName = nameInput.value.trim();
-    if (newName) {
-        username = newName;
-        localStorage.setItem("username", username);
-        alert("Name changed to " + username);
+// Notifications
+function showSystemNotification(messageText) {
+    if (document.visibilityState === "visible") return;
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("New Message", {
+            body: messageText.length > 60 ? messageText.substring(0, 57) + "..." : messageText,
+            tag: "chat-message"
+        });
     }
-});
+}
+
+// ==================== SEND & SWITCH ====================
+function sendMessage() {
+    if (globalLocked || lockedChannels.has(currentChannelName)) return;
+
+    const text = messageInput.value.trim();
+    if (!text) return;
+
+    const msg = `${getDisplayName()}: ${text}`;
+    messageInput.value = "";
+    messageInput.focus();
+
+    if (channel) channel.publish("message", msg);
+}
 
 function switchChannel(newChannel) {
     if (globalLocked) return;
@@ -250,17 +247,29 @@ function switchChannel(newChannel) {
     updateChannelButtons();
 }
 
-function sendMessage() {
-    if (globalLocked || lockedChannels.has(currentChannelName)) return;
+// ==================== EVENT LISTENERS ====================
+sendBtn.addEventListener("click", sendMessage);
+messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
 
-    const text = messageInput.value.trim();
-    if (!text) return;
+// Allow pressing Enter in name input
+nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        changeName();
+    }
+});
 
-    const msg = `${getDisplayName()}: ${text}`;
-    messageInput.value = "";
-    messageInput.focus();
+nameBtn.addEventListener("click", changeName);
 
-    if (channel) channel.publish("message", msg);
+function changeName() {
+    const newName = nameInput.value.trim();
+    if (newName) {
+        username = newName;
+        localStorage.setItem("username", username);
+        alert("Name changed to " + username);
+        nameInput.value = "";
+    }
 }
 
 // Connection
