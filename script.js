@@ -1,8 +1,6 @@
-console.log("Multi-Channel Chat Loaded! V4 Beta 4");
+console.log("Multi-Channel Chat Loaded! V4 Attempting final 2");
 
-
-
-
+// ==================== SENSITIVE CONFIG ====================
 const ABLY_API_KEY = "75TknQ.C5wjCA:__3VQaPjaBwnTHpXhXT67kXBHkESR_2ixoRZJhYXQFg";
 
 const channelPasswords = {
@@ -18,7 +16,7 @@ let currentChannelName = "public-chat";
 let channel = null;
 let systemChannel = null;
 
-// Lock state (only from server now)
+// Lock state (server-side only)
 let globalLocked = false;
 let lockedChannels = new Set();
 let lockMessage = " ";
@@ -43,7 +41,7 @@ async function saveLockToServer() {
         timestamp: Date.now()
     };
     try {
-        await systemChannel.history.push({ name: "lockState", data: state });
+        await systemChannel.publish("lockState", state);
     } catch (e) {
         console.warn("Failed to save lock to server", e);
     }
@@ -62,7 +60,7 @@ async function loadLockFromServer() {
             }
         }
     } catch (e) {
-        console.warn("No previous lock state on server");
+        console.warn("No previous lock state found on server");
     }
 }
 
@@ -122,17 +120,16 @@ function subscribeToChannel() {
     if (channel) channel.unsubscribe();
     channel = ably.channels.get(currentChannelName);
     channel.subscribe("message", (msg) => {
-        const messageText = msg.data;
-        channelLogs[currentChannelName].push(messageText);
+        channelLogs[currentChannelName].push(msg.data);
         renderChannel();
-        showSystemNotification(messageText);
+        showSystemNotification(msg.data);
     });
 }
 
 function subscribeToSystem() {
     systemChannel = ably.channels.get("system");
 
-    // Listen for lock updates from other users
+    // Listen for lock updates
     systemChannel.subscribe("lockUpdate", (msg) => {
         const data = msg.data;
         globalLocked = data.globalLocked;
@@ -141,7 +138,7 @@ function subscribeToSystem() {
         updateLockUI();
     });
 
-    // Load latest lock state from server when connecting
+    // Load latest lock state when connecting
     loadLockFromServer().then(() => {
         updateLockUI();
     });
